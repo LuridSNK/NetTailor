@@ -80,7 +80,7 @@ public class MyController : ControllerBase
     
     // ... other services & methods   
     
-    [HttpGet("{id}")]
+    [HttpGet("{name}")]
     public async Task<IActionResult> GetUserByGithubName(string name)
     {
         var userNameRequest = new GetUserRequest(name);
