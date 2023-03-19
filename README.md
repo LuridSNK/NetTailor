@@ -11,9 +11,8 @@ Add a reference to `HttTailor.DependencyInjection` and call the provided extensi
 // provide a marker, where HttpProfile implementations are located
 services.AddHttpProfiles<MyAssemblyMarker>(); 
 ```
-
-Define a service profile:
 ```csharp
+//  Define a service profile:
 public class GithubProfile : IHttpServiceProfile
 {
     // any additional dependencies can also be injected
@@ -39,10 +38,9 @@ public class GithubProfile : IHttpServiceProfile
         // Then configure HTTP requests:
         builder.Get<GetUserRequest, GetUserResponse>(
             // subroute configuration
-            request => $"users/{request.userName}",
+            request => $"users/{request.UserName}",
             message => message.
-                .Query(req => new { QueryValues = req.ItemsForQuery })
-                .Headers((req, headers) => 
+                .Headers((_, headers) => 
                 {
                     headers.Add("Accept", "application/vnd.github+json"); 
                 })
@@ -52,7 +50,8 @@ public class GithubProfile : IHttpServiceProfile
         builder.Post<RenameBranch, RenameBranchResponse>(
             request => $"repos/{request.Owner}/{request.Repo}/branches/{request.Branch}/rename",
             message => message.
-                // since we've defined a naming policy in WithServiceWideNamingPolicy(NamingPolicies.LowerSnakeCase)
+                // since we've defined a naming policy in 
+                // .WithServiceWideNamingPolicy(NamingPolicies.LowerSnakeCase) method
                 // we don't need to bother about namings anymore
                 .Content(req => new { req.NewName })
                 .Headers((req, headers) => 
@@ -61,6 +60,31 @@ public class GithubProfile : IHttpServiceProfile
                     headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
                 });
         );
+    }
+}
+```
+### Sending HTTP Requests:
+
+```csharp
+public class MyController : ControllerBase
+{
+    private readonly IHttpRequestDispatcher _dispatcher;
+    
+    // ... other services & methods   
+    
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetUserByGithubName(string name)
+    {
+        var userNameRequest = new GetUserRequest(Username);
+        var result = await _dispatcher.Dispatch<GetUserRequest, GetUserResponse>(userNameRequest, HttpContext.RequestAborted);
+        if (result.Success)
+        {
+            return Ok(result.Value);
+        }
+        else
+        {
+            throw result.Exception;
+        }
     }
 }
 ```
