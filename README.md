@@ -1,0 +1,2 @@
+# HttTailor
+HttpClient configuration tailor.
