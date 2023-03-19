@@ -83,7 +83,7 @@ public class MyController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUserByGithubName(string name)
     {
-        var userNameRequest = new GetUserRequest(Username);
+        var userNameRequest = new GetUserRequest(name);
         var result = await _dispatcher.Dispatch<GetUserRequest, GetUserResponse>(userNameRequest, HttpContext.RequestAborted);
         if (result.Success)
         {
