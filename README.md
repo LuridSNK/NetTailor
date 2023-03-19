@@ -2,15 +2,24 @@
 #### Weave your web requests with a bit of tailor's touch
 A library for fluent HttpClient configuration and CQRS-like usage.
 
-### Usage
+### Setting Up HttTailor
 
 Add [nuget](https://www.nuget.org/packages/HttTailor/) package or `dotnet add package HttTailor` in dotnet CLI.
 
-Add a reference to `HttTailor.DependencyInjection` and call the provided extension method in your ConfigureServices method to configure your interface:
+Add a reference to `HttTailor.DependencyInjection` and call the provided extension method in your `ConfigureServices`:
 ```csharp
 // provide a marker, where HttpProfile implementations are located
 services.AddHttpProfiles<MyAssemblyMarker>(); 
 ```
+Additionally you can provide profiles one by one.
+```csharp
+services.AddHttpProfiles(opt => 
+{
+    opt.UseProfile<TProfile>();
+});
+
+```
+### Creating a Profile
 ```csharp
 //  Define a service profile:
 public class GithubProfile : IHttpServiceProfile
@@ -64,7 +73,6 @@ public class GithubProfile : IHttpServiceProfile
 }
 ```
 ### Sending HTTP Requests:
-
 ```csharp
 public class MyController : ControllerBase
 {
