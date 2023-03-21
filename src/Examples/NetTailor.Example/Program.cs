@@ -24,8 +24,8 @@ services.AddHttpClientProfile("SampleClientProfile-1", client =>
     {
         client.BaseAddress = new Uri("https://sample-client-service-1.com/api");
         client.Timeout = TimeSpan.FromSeconds(30);
+        client.DefaultRequestHeaders.Add("default-of-service-1", "value");
     })
-    .AddDefaultHeaders(headers => headers.Add("header_from_defaults", Guid.NewGuid().ToString("N")))
     .Post<ServiceOneRequest, ServiceOneResponse>(
         "some-static-route",
         builder =>

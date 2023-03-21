@@ -21,8 +21,6 @@ public sealed class SampleClientProfileTwo : IHttpServiceProfile
             {
                 client.BaseAddress = new Uri(uri);
             })
-            .AddDefaultHeaders(headers => headers
-                .Authorization(scheme, token))
             .Get<ServiceTwoRequest, ServiceTwoResponse>(r => $"samples/{r.Id}", requestBuilder =>
             {
                 requestBuilder.Query(q => new { Venom = "Snake", Ocelot = new[] {"la", "le", "lu", "le", "lo"} }, Naming.LowerSnakeCase);

@@ -5,11 +5,11 @@ namespace NetTailor.Contracts;
 
 public class FluentHeaderDictionary : IEnumerable<KeyValuePair<string, IEnumerable<string>>>
 {
-    private readonly Dictionary<string, IEnumerable<string>> _dictionary;
+    private readonly Dictionary<string, IEnumerable<string?>> _dictionary;
     
     public FluentHeaderDictionary()
     {
-        _dictionary = new Dictionary<string, IEnumerable<string>>();
+        _dictionary = new Dictionary<string, IEnumerable<string?>>();
     }
     
     public AuthenticationHeaderValue? AuthenticationHeader { get; private set; }
@@ -22,11 +22,10 @@ public class FluentHeaderDictionary : IEnumerable<KeyValuePair<string, IEnumerab
 
     public FluentHeaderDictionary Add(string name, string? value)
     {
-        _dictionary.Add(name, new []{ value });
-        return this;
+        return Add(name, new[] { value });
     }
 
-    public FluentHeaderDictionary Add(string name, IEnumerable<string?> values)
+    public FluentHeaderDictionary Add(string name, string?[] values)
     {
         _dictionary.Add(name, values);
         return this;

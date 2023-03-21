@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Headers;
+using System.Text.Json;
 using NetTailor.Abstractions;
 using NetTailor.Contracts;
 
@@ -68,12 +69,13 @@ public class DefaultHttpRequestDispatcher : IHttpDispatcher
         HttpMessageInvoker client,
         CancellationToken ct = default)
     {
+        IEnumerable<KeyValuePair<string, IEnumerable<string>>> s = null;
         var uri = await strategy.BuildEndpoint(request, ct);
         var message = new HttpRequestMessage(strategy.Method, uri)
         {
             Content = await strategy.BuildHttpContent(request, ct)
         };
-        
+
         await strategy.BuildHeaders(request, message.Headers, ct);
         var responseMessage = await client.SendAsync(message, ct);
         return responseMessage;

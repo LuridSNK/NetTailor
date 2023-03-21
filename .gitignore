@@ -24,7 +24,7 @@ packages
 .nuget
 project.lock.json
 .vs
-
+Benchmarks
 # JetBrains Rider
 .idea/
 *.sln.iml

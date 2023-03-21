@@ -18,26 +18,6 @@ public static class HttpClientBuilderExtensions
     private const string ClientHasNoNameMessage = "A client must have a name";
 
     /// <summary>
-    /// Adds a delegate that will be used to set default request headers for the named <see cref="HttpClient"/>.
-    /// </summary>
-    /// <param name="builder">A builder for configuring named <see cref="HttpClient"/> instances returned by <see cref="IHttpClientFactory"/>.</param>
-    /// <param name="addDefaultHeaders">A delegate that is used to configure <see cref="HttpRequestHeaders"/>.</param>
-    /// <returns>An <see cref="IHttpClientBuilder"/> that can be used to configure the client.</returns>
-    /// <exception cref="InvalidOperationException">When <see cref="IHttpClientBuilder"/> has no name.</exception>
-    /// <exception cref="ArgumentNullException">When either <see cref="IHttpClientBuilder"/> or delegate is null.</exception>
-    public static IHttpClientBuilder AddDefaultHeaders(
-        this IHttpClientBuilder builder, 
-        Expression<Action<FluentHeaderDictionary>> addDefaultHeaders)
-    {
-        if (builder == null) throw new ArgumentNullException(nameof(builder));
-        if (addDefaultHeaders == null) throw new ArgumentNullException(nameof(addDefaultHeaders));
-        if (string.IsNullOrEmpty(builder.Name)) throw new InvalidOperationException(ClientHasNoNameMessage);
-        
-        builder.AddHttpMessageHandler(_ => new DefaultHeadersSetterDelegatingHandler(addDefaultHeaders));
-        return builder;
-    }
-
-    /// <summary>
     /// Adds a HEAD request to named <see cref="HttpClient"/>
     /// </summary>
     /// <param name="builder">A builder for configuring named <see cref="HttpClient"/> instances returned by <see cref="IHttpClientFactory"/>.</param>
@@ -278,8 +258,6 @@ public static class HttpClientBuilderExtensions
     {
         Debug.WriteLine($"Registering [{method}] request for client '{clientName}' with types [{typeof(TRequest)}:{typeof(TResponse)}]");
 
-        string.Intern(clientName);
-        
         services.AddSingleton<IClientNameGetter<TRequest>, DefaultClientNameGetter<TRequest>>(
             _ => new DefaultClientNameGetter<TRequest>(clientName));
         
@@ -299,8 +277,7 @@ public static class HttpClientBuilderExtensions
             services.AddSingleton<
                 IResponseDeserializer<TRequest, TResponse>, 
                 DefaultResponseDeserializer<TRequest, TResponse>>(
-                _ => new DefaultResponseDeserializer<TRequest, TResponse>(JsonSerializerOptions.Default));
-
+                _ => new DefaultResponseDeserializer<TRequest, TResponse>(JsonSerializerOptionsCache.CamelCase));
         }
     }
     
