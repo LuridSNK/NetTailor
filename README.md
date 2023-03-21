@@ -6,93 +6,77 @@ A library for fluent HttpClient configuration and CQRS-like usage.
 
 Add [nuget](https://www.nuget.org/packages/HttTailor/) package or `dotnet add package HttTailor` in dotnet CLI.
 
-Add a reference to `HttTailor.DependencyInjection` and call the provided extension method in your `ConfigureServices`:
-```csharp
-// provide a marker, where HttpProfile implementations are located
-services.AddHttpProfiles<MyAssemblyMarker>(); 
-```
-Additionally you can provide profiles one by one.
-```csharp
-services.AddHttpProfiles(opt => 
-{
-    opt.UseProfile<TProfile>();
-});
+## Defining profiles:
 
-```
-### Creating a Profile
+There are two ways of setting up your HttpProfiles:
+
+1. Register it using fluent interfaces by calling `AddHttpClientProfile()` on `IServiceCollection`:
+
 ```csharp
-//  Define a service profile:
-public class GithubProfile : IHttpServiceProfile
-{
-    // any additional dependencies can also be injected
-    private readonly IConfiguration _configuration;
-    
-    public GithubProfile(IConfiguration configuration) =>
-        _configuration = configuration;
-    
-    public void Configure(IHttpServiceBuilder builder)
-    {     
-        // Define service variables
-        builder
-            // base url
-            .WithBaseUrl("https://api.github.com/")   
-            // define property naming per service, no need to use JsonPropertyAttribute     
-            .WithServiceWideNamingPolicy(NamingPolicies.LowerSnakeCase);
-            // add IAsyncPolicy from Polly for service (can be multiple, if wrapping)
-            .WithRequestPolicy(myPolicy)
-            // add DelegatingHandler for service (can be multiple)
-            .WithHttpMessageHandler(myHandler);
-            
-            
-        // Then configure HTTP requests:
-        builder.Get<GetUserRequest, GetUserResponse>(
-            // subroute configuration
-            request => $"users/{request.UserName}",
-            message => message.
-                .Headers((_, headers) => 
-                {
-                    headers.Add("Accept", "application/vnd.github+json"); 
-                })
-        );
-        
-        var bearerToken = _configuration.GetValue<string>("GithubApi:Token");
-        builder.Post<RenameBranch, RenameBranchResponse>(
-            request => $"repos/{request.Owner}/{request.Repo}/branches/{request.Branch}/rename",
-            message => message.
-                // since we've defined a naming policy in 
-                // .WithServiceWideNamingPolicy(NamingPolicies.LowerSnakeCase) method
-                // we don't need to bother about namings anymore
-                .Content(req => new { req.NewName })
-                .Headers((req, headers) => 
-                {
-                    headers.Add("Accept", "application/vnd.github+json"); 
-                    headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
-                });
-        );
-    }
-}
-```
-### Sending HTTP Requests:
-```csharp
-public class MyController : ControllerBase
-{
-    private readonly IHttpRequestDispatcher _dispatcher;
-    
-    // ... other services & methods   
-    
-    [HttpGet("{name}")]
-    public async Task<IActionResult> GetUserByGithubName(string name)
+// define client
+services.AddHttpClientProfile("MyFirstHttpService", client =>
     {
-        var userNameRequest = new GetUserRequest(name);
-        var result = await _dispatcher.Dispatch<GetUserRequest, GetUserResponse>(userNameRequest, HttpContext.RequestAborted);
-        if (result.Success)
-        {
-            return Ok(result.Value);
-        }
-        else
-        {
-            throw result.Exception;
-        }
+        client.BaseAddress = new Uri("https://example-website.com");
+        client.Timeout = TimeSpan.FromSeconds(30);
+    })
+    // configure default request headers if necessary
+    .AddDefaultHeaders(headers => headers.Add("my_default_header", "default_header_value"))
+    // configure your endpoint and message values
+    .Post<ServiceOneRequest, ServiceOneResponse>(
+        request => $"endpoint/{request.Id}",
+        builder =>
+    {
+        // set naming policy
+        builder.UseNaming(Naming.UpperSnakeCase);
+        // configure query, content and per-request headers
+        builder.Query(q => new { q.Name });
+        builder.Content(c => new { c.Id, c.CreatedAt }, Naming.LowerSnakeCase);
+        builder.Headers((_, headers) => headers            
+            .Add("per_reqest_header", "per_request_header_value")
+            .Add("another_one", "value_two"));
+    })
+```
+
+2. Define your service by implementing `IHttpServiceProfile` interface, and register it using fluent interfaces by calling `AddHttpClientProfile<TProfile>();` on `IServiceCollection`:
+
+```csharp
+public sealed class MySecondHttpService : IHttpServiceProfile
+{
+    // convinient Dependency Injection
+    private readonly IConfiguration _configuration;
+
+    public SampleClientProfileTwo(IConfiguration configuration) => 
+        _configuration = configuration;
+
+    public void Configure(IHttpServiceBuilder builder)
+    {
+        var uri = _configuration.GetValue<string>("SecondService:Uri");
+        var scheme = _configuration.GetValue<string>("SecondService:Scheme");
+        var token = _configuration.GetValue<string>("SecondService:Token");
+        
+        // create a client definition
+        builder.Create(client =>
+            {
+                client.BaseAddress = new Uri(uri);
+            })
+            // add default headers
+            .AddDefaultHeaders(headers => headers
+                .Authorization(scheme, token))
+            // define your requests and values
+            .Get<ServiceTwoRequest, ServiceTwoResponse>(r => $"endpoint/{r.Id}", requestBuilder =>
+            {
+                requestBuilder.Query(q => new { Venom = "Snake", OcelotSays = new[] {"la", "le", "lu", "le", "lo"} }, Naming.LowerSnakeCase);
+                requestBuilder.Headers((_, headers) => headers
+                    .Add("set-of-values", new []{ "v1", "v2", "v3" }));
+            });
     }
 }
+```
+## Calling your services in a CQRS-like fashion:
+To call your requests you simply need to call for `IHttpDispatcher` via Dependency Injection:
+```csharp
+// example
+var dispatcher = serviceProvider.GetRequiredService<IHttpDispatcher>();
+var command = new YourCommand(/* your object*/)
+await dispatcher.Send<YourCommand, YourResponse>(command, CancellationToken.None);
 ```
