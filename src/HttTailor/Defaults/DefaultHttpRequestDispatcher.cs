@@ -16,7 +16,7 @@ public class DefaultHttpRequestDispatcher : IHttpDispatcher
     }
     
 
-    public async Task<HttpResult<TResponse>> Send<TRequest, TResponse>(TRequest request, CancellationToken ct = default) 
+    public async Task<HttpResult<TResponse>> Dispatch<TRequest, TResponse>(TRequest request, CancellationToken ct = default) 
         where TRequest : IHttpRequest<TResponse>
         where TResponse : class 
     {
@@ -35,7 +35,7 @@ public class DefaultHttpRequestDispatcher : IHttpDispatcher
         return await GetJsonContent(strategy, httpResponseMessage, ct);
     }
 
-    public async Task<HttpResult<Empty>> Send<TRequest>(TRequest request, CancellationToken ct = default) 
+    public async Task<HttpResult<Empty>> Dispatch<TRequest>(TRequest request, CancellationToken ct = default) 
         where TRequest : IHttpRequest<Empty>
     {
         if (request == null) return HttpResults.Error(new ArgumentNullException(nameof(request)));

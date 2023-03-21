@@ -46,7 +46,7 @@ var dispatcher = serviceProvider.GetRequiredService<IHttpDispatcher>();
 
 // send requests
 var serviceOneCmd = new ServiceOneRequest(Guid.NewGuid(), "Kirll_Runk", DateTimeOffset.UtcNow);
-var serviceOneResult = await dispatcher.Send<ServiceOneRequest, ServiceOneResponse>(serviceOneCmd, CancellationToken.None);
+var serviceOneResult = await dispatcher.Dispatch<ServiceOneRequest, ServiceOneResponse>(serviceOneCmd, CancellationToken.None);
 Console.ForegroundColor = ConsoleColor.Green;
 await Console.Out.WriteLineAsync(serviceOneResult.Successful
     ? $"RESPONSE SUCCESSFUL:\n{JsonSerializer.Serialize(serviceOneResult.Value, JsonSerializerOptionsCache.GetSettingsOrDefault(Naming.LowerSnakeCase))}"
@@ -56,7 +56,7 @@ Console.ResetColor();
 await Console.Out.WriteLineAsync("\n\n");
 
 var serviceTwoCmd = new ServiceTwoRequest(777);
-var serviceTwoResult = await dispatcher.Send<ServiceTwoRequest, ServiceTwoResponse>(serviceTwoCmd, CancellationToken.None);
+var serviceTwoResult = await dispatcher.Dispatch<ServiceTwoRequest, ServiceTwoResponse>(serviceTwoCmd, CancellationToken.None);
 Console.ForegroundColor = ConsoleColor.Green;
 await Console.Out.WriteLineAsync(serviceOneResult.Successful
     ? $"RESPONSE SUCCESSFUL:\n{JsonSerializer.Serialize(serviceTwoResult.Value, JsonSerializerOptionsCache.GetSettingsOrDefault(Naming.UpperSnakeCase))}"
@@ -66,7 +66,7 @@ Console.ResetColor();
 await Console.Out.WriteLineAsync("\n\n");
 
 var serviceTwoEmptyCmd = new ServiceTwoEmptyRequest();
-var serviceTwoEmptyResult = await dispatcher.Send(serviceTwoEmptyCmd, CancellationToken.None);
+var serviceTwoEmptyResult = await dispatcher.Dispatch(serviceTwoEmptyCmd, CancellationToken.None);
 Console.ForegroundColor = ConsoleColor.Green;
 await Console.Out.WriteLineAsync(serviceTwoEmptyResult.Successful
     ? $"RESPONSE SUCCESSFUL:\n{serviceTwoEmptyResult.Value}"

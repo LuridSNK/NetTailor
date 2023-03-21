@@ -78,5 +78,5 @@ To call your requests you simply need to call for `IHttpDispatcher` via Dependen
 // example
 var dispatcher = serviceProvider.GetRequiredService<IHttpDispatcher>();
 var command = new YourCommand(/* your object*/)
-await dispatcher.Send<YourCommand, YourResponse>(command, CancellationToken.None);
+await dispatcher.Dispatch<YourCommand, YourResponse>(command, CancellationToken.None);
 ```
