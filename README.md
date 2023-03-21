@@ -1,10 +1,10 @@
-# HttTailor
-#### Weave your web requests with a bit of tailor's touch
+# NetTailor
+### Weave your network like a master craftsman.
 A library for fluent HttpClient configuration and CQRS-like usage.
 
-### Setting Up HttTailor
+### Setting Up NetTailor
 
-Add [nuget](https://www.nuget.org/packages/HttTailor/) package or `dotnet add package HttTailor` in dotnet CLI.
+Add [nuget](https://www.nuget.org/packages/NetTailor/) package or `dotnet add package NetTailor` in dotnet CLI.
 
 ## Defining profiles:
 
