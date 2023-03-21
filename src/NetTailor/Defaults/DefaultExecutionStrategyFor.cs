@@ -29,9 +29,9 @@ public class DefaultExecutionStrategyFor<TRequest, TResponse> : IExecutionStrate
         _httpMethodGetter = httpMethodGetter;
         _endpointBuilder = endpointBuilder;
         _requestNamingGetter = requestNamingGetter;
-        _httpHeadersSetter = httpHeadersSetter; // can be null
-        _queryStringBuilder = queryStringBuilder; // can be null
-        _httpContentBuilder = httpContentBuilder; // can be null
+        _httpHeadersSetter = httpHeadersSetter;
+        _queryStringBuilder = queryStringBuilder;
+        _httpContentBuilder = httpContentBuilder;
         _responseDeserializer = responseDeserializer;
     }
 

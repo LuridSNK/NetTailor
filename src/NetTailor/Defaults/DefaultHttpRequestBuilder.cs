@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Linq.Expressions;
+using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.ObjectPool;
@@ -20,7 +22,7 @@ internal sealed class DefaultHttpRequestBuilder<TRequest> : IHttpRequestBuilder<
         if (configureContent == null) throw new ArgumentNullException(nameof(configureContent));
         
         var jsonOptions = JsonSerializerOptionsCache.GetSettingsOrDefault(naming);
-        Debug.WriteLine($"Naming policy for request Content [{typeof(TRequest)}] is {naming.GetType()}");
+        Debug.WriteLine($"Naming policy for request Content [{typeof(TRequest)}] is {naming:G}");
         Services.AddSingleton<IHttpContentBuilder<TRequest>, DefaultHttpContentBuilder<TRequest>>(sp =>
         {
             var memoryStreamManager = sp.GetRequiredService<RecyclableMemoryStreamManager>();
@@ -37,7 +39,7 @@ internal sealed class DefaultHttpRequestBuilder<TRequest> : IHttpRequestBuilder<
         if (configureQuery == null) throw new ArgumentNullException(nameof(configureQuery));
         
         var namingPolicy = NamingPolicies.GetNamingPolicyOrDefault(naming);
-        Debug.WriteLine($"Naming policy for request Query [{typeof(TRequest)}] is {naming.GetType()}");
+        Debug.WriteLine($"Naming policy for request Query [{typeof(TRequest)}] is {naming:G}");
         Services.AddSingleton<IQueryStringBuilder<TRequest>, DefaultQueryStringBuilder<TRequest>>(sp =>
         {
             var stringBuilderObjectPool = sp.GetRequiredService<ObjectPool<StringBuilder>>();
@@ -49,7 +51,7 @@ internal sealed class DefaultHttpRequestBuilder<TRequest> : IHttpRequestBuilder<
         return this;
     }
 
-    public IHttpRequestBuilder<TRequest> Headers(Expression<Action<TRequest, FluentHeaderDictionary>> configureHeaders)
+    public IHttpRequestBuilder<TRequest> Headers(Action<TRequest, HttpRequestHeaders> configureHeaders)
     {
         if (configureHeaders == null) throw new ArgumentNullException(nameof(configureHeaders));
         

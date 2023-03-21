@@ -14,7 +14,7 @@ public class MockingDelegatingHandler : DelegatingHandler
     private readonly Naming? _naming;
 
     public MockingDelegatingHandler(
-        object valueToReturn, 
+        object valueToReturn,
         HttpStatusCode statusCodeToReturn, 
         Naming? naming = null)
     {

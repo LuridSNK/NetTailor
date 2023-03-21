@@ -2,7 +2,7 @@
 
 namespace NetTailor.Contracts;
 
-public record HttpResult<TResult>
+public record struct HttpResult<TResult>
 (
     TResult? Value, 
     bool Successful, 

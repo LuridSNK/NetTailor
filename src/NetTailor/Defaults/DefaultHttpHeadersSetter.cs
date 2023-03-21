@@ -1,23 +1,17 @@
-﻿using System.Linq.Expressions;
-using System.Net.Http.Headers;
-using FastExpressionCompiler;
+﻿using System.Net.Http.Headers;
 using NetTailor.Abstractions;
-using NetTailor.Contracts;
-using NetTailor.Extensions;
 
 namespace NetTailor.Defaults;
 
 internal sealed class DefaultHttpHeadersSetter<TRequest> : IHttpHeadersSetter<TRequest>
 {
-    private readonly Action<TRequest, FluentHeaderDictionary> _configureHeaders;
+    private readonly Action<TRequest, HttpRequestHeaders> _configureHeaders;
 
-    public DefaultHttpHeadersSetter(Expression<Action<TRequest, FluentHeaderDictionary>> configureHeaders)
-        => _configureHeaders = configureHeaders.CompileFast();
+    public DefaultHttpHeadersSetter(Action<TRequest, HttpRequestHeaders> configureHeaders)
+        => _configureHeaders = configureHeaders;
     
     public async ValueTask SetHeaders(TRequest request, HttpRequestHeaders headers)
     {
-        var dict = new FluentHeaderDictionary();
-        _configureHeaders.Invoke(request, dict);
-        FluentHeaderDictionaryExtensions.WriteHeaders(dict, headers);
+        _configureHeaders.Invoke(request, headers);
     }
 }

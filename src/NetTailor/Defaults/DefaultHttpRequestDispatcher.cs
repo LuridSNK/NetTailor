@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Diagnostics;
 using System.Text.Json;
 using NetTailor.Abstractions;
 using NetTailor.Contracts;
@@ -77,6 +77,8 @@ public class DefaultHttpRequestDispatcher : IHttpDispatcher
         };
 
         await strategy.BuildHeaders(request, message.Headers, ct);
+        Debug.WriteLine(message);
+        Debug.WriteLineIf(message.Content is not null, message.Content.ReadAsStringAsync());
         var responseMessage = await client.SendAsync(message, ct);
         return responseMessage;
     }
