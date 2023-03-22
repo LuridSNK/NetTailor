@@ -1,17 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>10</LangVersion>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>0.1.0</Version>
+        <Title>NetTailor</Title>
+        <Authors>Kirill Filippenko</Authors>
+        <Description>Fluent HttpClient call configurator</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/LuridSNK/NetTailor</RepositoryUrl>
+        <PackageTags>http http-client cqrs</PackageTags>
+        <TargetFrameworks>net6.0;net7.0;netstandard2.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="FastExpressionCompiler" Version="3.3.4" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
       <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="7.0.4" />
       <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.3.2" />
       <PackageReference Include="System.Text.Json" Version="7.0.2" />
