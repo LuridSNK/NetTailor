@@ -12,8 +12,9 @@ internal sealed class DefaultEndpointBuilder<TRequest> : IEndpointBuilder<TReque
         _routeBuilder = routeConfiguration.CompileFast();
     }
 
-    public async ValueTask<string> Build(TRequest request)
+    public ValueTask<string> Build(TRequest request)
     {
-        return _routeBuilder.Invoke(request);
+        var endpoint = _routeBuilder.Invoke(request);
+        return new ValueTask<string>(endpoint);
     }
 }

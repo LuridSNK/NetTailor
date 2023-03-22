@@ -24,10 +24,11 @@ internal sealed class DefaultQueryStringBuilder<TRequest> : IQueryStringBuilder<
         _namingPolicy = namingPolicy;
     }
     
-    public async ValueTask<string> Build(TRequest request)
+    public ValueTask<string> Build(TRequest request)
     {
         var stringBuilder = _stringBuilderObjectPool.Get();
         var target = _configureQuery.Invoke(request);
-        return QueryStringBuilder.Build(stringBuilder, target, _namingPolicy);
+        var queryString =  QueryStringBuilder.Build(stringBuilder, target, _namingPolicy);
+        return new ValueTask<string>(queryString);
     }
 }

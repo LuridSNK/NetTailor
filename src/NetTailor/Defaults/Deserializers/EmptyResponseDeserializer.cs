@@ -6,8 +6,9 @@ namespace NetTailor.Defaults.Deserializers;
 
 public class EmptyResponseDeserializer<TRequest> : IResponseDeserializer<TRequest, Empty>
 {
-    public async ValueTask<Empty> Deserialize(HttpContent json, JsonSerializerOptions? serializerOptions = default, CancellationToken ct = default)
-    {
-        return Empty.Value;
-    }
+    public ValueTask<Empty> Deserialize(
+        HttpContent json, 
+        JsonSerializerOptions? serializerOptions = default,
+        CancellationToken ct = default) 
+        => new(Empty.Value);
 }

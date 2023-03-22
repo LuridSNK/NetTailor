@@ -97,12 +97,9 @@ public static class QueryStringBuilder
     private static bool IsUnsupported(Type type) => 
         ConvertibleType.IsAssignableFrom(type);
     
-
-    private const string ExpressionParameter = "instance";
-
     private static Func<object, object> CompileGetter(PropertyInfo property)
     {
-        var instance = Expression.Parameter(typeof(object), ExpressionParameter);
+        var instance = Expression.Parameter(typeof(object), "instance");
         var castedInstance = Expression.Convert(instance, property.DeclaringType);
         var propertyAccess = Expression.Property(castedInstance, property);
         var result = Expression.Convert(propertyAccess, typeof(object));

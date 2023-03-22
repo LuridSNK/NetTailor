@@ -10,8 +10,9 @@ internal sealed class DefaultHttpHeadersSetter<TRequest> : IHttpHeadersSetter<TR
     public DefaultHttpHeadersSetter(Action<TRequest, HttpRequestHeaders> configureHeaders)
         => _configureHeaders = configureHeaders;
     
-    public async ValueTask SetHeaders(TRequest request, HttpRequestHeaders headers)
+    public ValueTask SetHeaders(TRequest request, HttpRequestHeaders headers)
     {
         _configureHeaders.Invoke(request, headers);
+        return new ValueTask();
     }
 }

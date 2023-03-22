@@ -69,7 +69,6 @@ public class DefaultHttpRequestDispatcher : IHttpDispatcher
         HttpMessageInvoker client,
         CancellationToken ct = default)
     {
-        IEnumerable<KeyValuePair<string, IEnumerable<string>>> s = null;
         var uri = await strategy.BuildEndpoint(request, ct);
         var message = new HttpRequestMessage(strategy.Method, uri)
         {
