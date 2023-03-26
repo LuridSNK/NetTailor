@@ -3,14 +3,14 @@ using NetTailor.Abstractions;
 
 namespace NetTailor.Defaults;
 
-internal sealed class DefaultHttpHeadersSetter<TRequest> : IHttpHeadersSetter<TRequest>
+internal sealed class DefaultHeaderProvider<TRequest> : IHeaderProvider<TRequest>
 {
     private readonly Action<TRequest, HttpRequestHeaders> _configureHeaders;
 
-    public DefaultHttpHeadersSetter(Action<TRequest, HttpRequestHeaders> configureHeaders)
+    public DefaultHeaderProvider(Action<TRequest, HttpRequestHeaders> configureHeaders)
         => _configureHeaders = configureHeaders;
-    
-    public ValueTask SetHeaders(TRequest request, HttpRequestHeaders headers)
+
+    public ValueTask Provide(TRequest request, HttpRequestHeaders headers, CancellationToken ct = default)
     {
         _configureHeaders.Invoke(request, headers);
         return new ValueTask();

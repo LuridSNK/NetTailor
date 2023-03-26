@@ -7,94 +7,96 @@ namespace NetTailor.Defaults;
 
 public class DefaultHttpRequestDispatcher : IHttpDispatcher
 {
-    private readonly IExecutionStrategyProvider _executionStrategyProvider;
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IRequestExecutionContextFactory _contextFactory;
 
-    public DefaultHttpRequestDispatcher(IExecutionStrategyProvider executionStrategyProvider, IHttpClientFactory httpClientHttpClientFactory)
+    public DefaultHttpRequestDispatcher(IRequestExecutionContextFactory contextFactory)
     {
-        _executionStrategyProvider = executionStrategyProvider;
-        _httpClientFactory = httpClientHttpClientFactory;
+        _contextFactory = contextFactory;
     }
     
-
     public async Task<HttpResult<TResponse>> Dispatch<TRequest, TResponse>(TRequest request, CancellationToken ct = default) 
         where TRequest : IHttpRequest<TResponse>
         where TResponse : class 
     {
-        if (request == null) return HttpResults.Error<TResponse>(new ArgumentNullException(nameof(request)));
+        if (request == null) return HttpResults.Failure<TResponse>(new ArgumentNullException(nameof(request)));
+        
+        var ctx = _contextFactory.Create<TRequest, TResponse>();
+        
+        if (ctx is null) return HttpResults.Failure<TResponse>(new ArgumentNullException(nameof(ctx)));
 
-        var (strategy, client) = GetStrategyAndClient<TRequest, TResponse>(_executionStrategyProvider, _httpClientFactory);
-       
-        var httpResponseMessage = await SendCoreAsync(strategy, request, client, ct);
-        if (!httpResponseMessage.IsSuccessStatusCode)
+        var uri = await BuildUri(ctx, request, ct);
+        var message = ctx.BodyShaper.Shape(request);
+        var content = await ctx.ContentWriter.Write(message, ct);
+        var httpRequest = new HttpRequestMessage(ctx.Method, uri)
         {
-            var httpMessage = $"API responded {httpResponseMessage.StatusCode:D} with reason phrase {httpResponseMessage.ReasonPhrase} while processing request {typeof(TRequest)}";
+            Content = content
+        };
+        
+        await ctx.HeaderProvider.Provide(request, httpRequest.Headers, ct);
+        
+        Debug.WriteLine(httpRequest);
+        
+        var httpResponse = await ctx.Client.SendAsync(httpRequest, ct);
+        if (!httpResponse.IsSuccessStatusCode)
+        {
+            var httpMessage = $"API responded {httpResponse.StatusCode:D} with reason phrase {httpResponse.ReasonPhrase} while processing request {typeof(TRequest)}";
             var ex = new HttpRequestException(httpMessage);
-            return HttpResults.Error<TResponse>(ex);
+            return HttpResults.Failure<TResponse>(ex);
         }
+        
+        Debug.WriteLine(httpResponse);
 
-        return await GetJsonContent(strategy, httpResponseMessage, ct);
+        var value = await ctx.ContentReader.Read<TResponse>(httpResponse.Content!, ct);
+        
+        if (value is null)
+        {
+            var jsonMessage = $"Could not deserialize {typeof(TResponse)}. Yes, message of type {typeof(TRequest)} resulted in {httpResponse.StatusCode:D} status code.";
+            var ex = new JsonException(jsonMessage);
+            return HttpResults.Failure<TResponse>(ex);
+        }
+        
+        return HttpResults.Success(value);
     }
 
     public async Task<HttpResult<Empty>> Dispatch<TRequest>(TRequest request, CancellationToken ct = default) 
         where TRequest : IHttpRequest<Empty>
     {
-        if (request == null) return HttpResults.Error(new ArgumentNullException(nameof(request)));
-
-        var (strategy, client) = GetStrategyAndClient<TRequest, Empty>(_executionStrategyProvider, _httpClientFactory);
+        if (request == null) return HttpResults.Failure(new ArgumentNullException(nameof(request)));
         
-        var httpResponseMessage = await SendCoreAsync(strategy, request, client, ct);
-        if (!httpResponseMessage.IsSuccessStatusCode)
+        var ctx = _contextFactory.Create<TRequest, Empty>();
+        
+        if (ctx is null) return HttpResults.Failure(new ArgumentNullException(nameof(ctx)));
+
+        var uri = await BuildUri(ctx, request, ct);
+        var message = new HttpRequestMessage(ctx.Method, uri)
         {
-            var httpMessage = $"API responded {httpResponseMessage.StatusCode:D} with reason phrase {httpResponseMessage.ReasonPhrase} while processing request {typeof(TRequest)}";
+            Content = await ctx.ContentWriter.Write(request, ct)
+        };
+        
+        await ctx.HeaderProvider.Provide(request, message.Headers, ct);
+        
+        Debug.WriteLine(message);
+        Debug.WriteLineIf(message.Content is not null, message.Content!.ReadAsStringAsync());
+        
+        var httpResponse = await ctx.Client.SendAsync(message, ct);
+        if (!httpResponse.IsSuccessStatusCode)
+        {
+            var httpMessage = $"API responded {httpResponse.StatusCode:D} with reason phrase {httpResponse.ReasonPhrase} while processing request {typeof(TRequest)}";
             var ex = new HttpRequestException(httpMessage);
-            return HttpResults.Error(ex);
+            return HttpResults.Failure(ex);
         }
         
         return HttpResults.Success(Empty.Value);
     }
-    
-    private static (IExecutionStrategy<TRequest, TResponse>, HttpClient) GetStrategyAndClient<TRequest, TResponse>(
-        IExecutionStrategyProvider executionStrategyProvider, 
-        IHttpClientFactory httpClientFactory)
-    {
-        var strategy = executionStrategyProvider.Provide<TRequest, TResponse>();
-        var client = httpClientFactory.CreateClient(strategy.ClientName);
-        return (strategy, client);
-    }
-    
-    private static async Task<HttpResponseMessage> SendCoreAsync<TRequest, TResponse>(
-        IExecutionStrategy<TRequest, TResponse> strategy,
-        TRequest request,
-        HttpMessageInvoker client,
-        CancellationToken ct = default)
-    {
-        var uri = await strategy.BuildEndpoint(request, ct);
-        var message = new HttpRequestMessage(strategy.Method, uri)
-        {
-            Content = await strategy.BuildHttpContent(request, ct)
-        };
 
-        await strategy.BuildHeaders(request, message.Headers, ct);
-        Debug.WriteLine(message);
-        Debug.WriteLineIf(message.Content is not null, message.Content.ReadAsStringAsync());
-        var responseMessage = await client.SendAsync(message, ct);
-        return responseMessage;
-    }
-
-    private static async Task<HttpResult<TResponse>> GetJsonContent<TRequest, TResponse>(
-        IExecutionStrategy<TRequest, TResponse> strategy, 
-        HttpResponseMessage msg, 
-        CancellationToken ct = default) where TResponse : class
+    private static async ValueTask<string> BuildUri<TRequest, TResponse>(IRequestExecutionContext<TRequest, TResponse> ctx, TRequest request, CancellationToken ct = default)
     {
-        var response = await strategy.Deserialize(msg.Content, ct);
-        if (response is null)
-        {
-            var jsonMessage = $"Could not deserialize {typeof(TResponse)}. Yes, message of type {typeof(TRequest)} resulted in {msg.StatusCode:D} status code.";
-            var ex = new JsonException(jsonMessage);
-            return HttpResults.Error<TResponse>(ex);
-        }
+        var endpointString = await ctx.EndpointBuilder.Build(request, ct);
+        var queryString = await ctx.QueryBuilder.Build(request, ct);
+        
+        Debug.WriteLine($"[{typeof(TRequest)}:{typeof(TResponse)}] endpoint: {endpointString}");
+        Debug.WriteLine($"[{typeof(TRequest)}:{typeof(TResponse)}] query: {queryString}");
 
-        return HttpResults.Success(response);
+        return string.Concat(endpointString, queryString);
     }
 }

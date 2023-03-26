@@ -24,13 +24,9 @@ public class MockingDelegatingHandler : DelegatingHandler
     }
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        await Console.Out.WriteLineAsync($"PRINTING REQUEST:");
         Console.ForegroundColor = ConsoleColor.Yellow;
+        await Console.Out.WriteLineAsync("PRINTING REQUEST:");
         await Console.Out.WriteLineAsync($"{request}");
-        if (request.Content is not null)
-        {
-            await Console.Out.WriteLineAsync($"Content:\n{await request.Content.ReadAsStringAsync(cancellationToken)}");
-        }
         Console.ResetColor();
         await Task.Delay(TimeSpan.FromMilliseconds(Random.Shared.Next(1_800)), cancellationToken);
 

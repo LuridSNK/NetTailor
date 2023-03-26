@@ -23,8 +23,8 @@ internal sealed class DefaultQueryStringBuilder<TRequest> : IQueryStringBuilder<
         _configureQuery = configureQuery.CompileFast();
         _namingPolicy = namingPolicy;
     }
-    
-    public ValueTask<string> Build(TRequest request)
+
+    public ValueTask<string> Build(TRequest request, CancellationToken ct = default)
     {
         var stringBuilder = _stringBuilderObjectPool.Get();
         var target = _configureQuery.Invoke(request);

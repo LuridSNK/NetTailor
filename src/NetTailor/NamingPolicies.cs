@@ -20,8 +20,10 @@ public static class NamingPolicies
     /// </summary>
     public static JsonNamingPolicy CamelCase => JsonNamingPolicy.CamelCase;
     
-    
-    public static JsonNamingPolicy GetNamingPolicyOrDefault(Naming? naming)
+    /// <summary>
+    /// Gets the <see cref="JsonNamingPolicy"/> for the given <see cref="Naming"/> or defaults to <see cref="CamelCase"/>
+    /// </summary>
+    public static JsonNamingPolicy GetNamingPolicyOrDefault(Naming? naming = null)
     {
         return naming switch
         {

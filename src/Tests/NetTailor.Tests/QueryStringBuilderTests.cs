@@ -44,7 +44,8 @@ public class QueryStringBuilderTests
     [Fact]
     public void QueryStringBuilder_WhenGivenNullString_ShouldReturnEmptyQueryString()
     {
-        var s = QueryStringBuilder.Build(_stringBuilder, null, null);
+        SomeRequest req = null;
+        var s = QueryStringBuilder.Build(_stringBuilder, req, null);
         _stringBuilder.Clear();
         Assert.Equal(
             expected: s, 
@@ -70,6 +71,24 @@ public class QueryStringBuilderTests
         
         result.Should()
             .Be("?string_value=oneTwoTree&numeric_value=321123&collection=item1&collection=item2&collection=item3");
+    }
+    
+    [Fact]
+    public void QueryStringBuilder_WhenGivenADictionary_ShouldReturnValidQueryString()
+    {
+        var dict = new Dictionary<string, string>
+        {
+            ["value"] = "oneTwoTree",
+            ["number"] = "321123",
+            ["item"] = "12312312312"
+        };
+        
+        var result = QueryStringBuilder.Build(_stringBuilder, dict, NamingPolicies.LowerSnakeCase);
+
+        _stringBuilder.Clear();
+        
+        result.Should()
+            .Be("?value=oneTwoTree&number=321123&item=12312312312");
     }
     
     [Fact]

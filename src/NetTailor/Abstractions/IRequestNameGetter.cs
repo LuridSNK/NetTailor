@@ -4,7 +4,7 @@
 /// Gets the name of a profile of <see cref="HttpClient"/>.
 /// </summary>
 /// <typeparam name="TRequest"></typeparam>
-public interface IClientNameGetter<TRequest>
+public interface IRequestNameGetter<TRequest>
 {
     /// <summary>
     /// The <see cref="HttpClient"/> name/

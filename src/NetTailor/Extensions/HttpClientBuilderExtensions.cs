@@ -1,12 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Linq.Expressions;
-using System.Net.Http.Headers;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using NetTailor.Abstractions;
-using NetTailor.Contracts;
 using NetTailor.Defaults;
-using NetTailor.Defaults.Deserializers;
+using NetTailor.Defaults.ContentSerializers;
 
 namespace NetTailor.Extensions;
 
@@ -28,14 +27,13 @@ public static class HttpClientBuilderExtensions
     public static IHttpClientBuilder Head<TRequest, TResponse>(
         this IHttpClientBuilder builder, 
         Expression<Func<TRequest, string>> configureRoute,
-        Action<IHttpRequestBuilder<TRequest>> configureRequest)
+        Action<IHttpRequestBuilder<TRequest, TResponse>> configureRequest)
         where TRequest : IHttpRequest<TResponse>
     {
         CheckArgumentsAndThrowIfAnyIsNull(builder, configureRoute, configureRequest);
         
         builder.Services.ConfigureMethodAndEndpointFor<TRequest, TResponse>(builder.Name, HttpMethod.Head, configureRoute);
-
-        var requestBuilder = new DefaultHttpRequestBuilder<TRequest>(builder.Services);
+        var requestBuilder = new DefaultHttpRequestBuilder<TRequest, TResponse>(builder.Services);
         configureRequest.Invoke(requestBuilder);
         return builder;
     }
@@ -51,9 +49,9 @@ public static class HttpClientBuilderExtensions
     public static IHttpClientBuilder Head<TRequest, TResponse>(
         this IHttpClientBuilder builder,
         string route,
-        Action<IHttpRequestBuilder<TRequest>> configureRequest)
+        Action<IHttpRequestBuilder<TRequest, TResponse>> configureRequest)
         where TRequest : IHttpRequest<TResponse> 
-        => builder.Head<TRequest, TResponse>(_ => route, configureRequest);
+        => builder.Head(_ => route, configureRequest);
     
     /// <summary>
     /// Adds a GET request to named <see cref="HttpClient"/>
@@ -66,14 +64,14 @@ public static class HttpClientBuilderExtensions
     public static IHttpClientBuilder Get<TRequest, TResponse>(
         this IHttpClientBuilder builder, 
         Expression<Func<TRequest, string>> configureRoute,
-        Action<IHttpRequestBuilder<TRequest>> configureRequest)
+        Action<IHttpRequestBuilder<TRequest, TResponse>> configureRequest)
         where TRequest : IHttpRequest<TResponse>
     {
         CheckArgumentsAndThrowIfAnyIsNull(builder, configureRoute, configureRequest);
         
         builder.Services.ConfigureMethodAndEndpointFor<TRequest, TResponse>(builder.Name, HttpMethod.Get, configureRoute);
         
-        var requestBuilder = new DefaultHttpRequestBuilder<TRequest>(builder.Services);
+        var requestBuilder = new DefaultHttpRequestBuilder<TRequest, TResponse>(builder.Services);
         configureRequest.Invoke(requestBuilder);
         return builder;
     }
@@ -89,9 +87,9 @@ public static class HttpClientBuilderExtensions
     public static IHttpClientBuilder Get<TRequest, TResponse>(
         this IHttpClientBuilder builder,
         string route,
-        Action<IHttpRequestBuilder<TRequest>> configureRequest)
+        Action<IHttpRequestBuilder<TRequest, TResponse>> configureRequest)
         where TRequest : IHttpRequest<TResponse> 
-        => builder.Get<TRequest, TResponse>(_ => route, configureRequest);
+        => builder.Get(_ => route, configureRequest);
 
     /// <summary>
     /// Adds a POST request to named <see cref="HttpClient"/>
@@ -104,14 +102,14 @@ public static class HttpClientBuilderExtensions
     public static IHttpClientBuilder Post<TRequest, TResponse>(
         this IHttpClientBuilder builder,
         Expression<Func<TRequest, string>> configureRoute,
-        Action<IHttpRequestBuilder<TRequest>> configureRequest)
+        Action<IHttpRequestBuilder<TRequest, TResponse>> configureRequest)
         where TRequest : IHttpRequest<TResponse>
     {
         CheckArgumentsAndThrowIfAnyIsNull(builder, configureRoute, configureRequest);
         
         builder.Services.ConfigureMethodAndEndpointFor<TRequest, TResponse>(builder.Name, HttpMethod.Post, configureRoute);
         
-        var requestBuilder = new DefaultHttpRequestBuilder<TRequest>(builder.Services);
+        var requestBuilder = new DefaultHttpRequestBuilder<TRequest, TResponse>(builder.Services);
         configureRequest.Invoke(requestBuilder);
         return builder;
     }
@@ -127,9 +125,9 @@ public static class HttpClientBuilderExtensions
     public static IHttpClientBuilder Post<TRequest, TResponse>(
         this IHttpClientBuilder builder,
         string route,
-        Action<IHttpRequestBuilder<TRequest>> configureRequest)
+        Action<IHttpRequestBuilder<TRequest, TResponse>> configureRequest)
         where TRequest : IHttpRequest<TResponse>
-        => builder.Post<TRequest, TResponse>(_ => route, configureRequest);
+        => builder.Post(_ => route, configureRequest);
     
     
     /// <summary>
@@ -143,14 +141,14 @@ public static class HttpClientBuilderExtensions
     public static IHttpClientBuilder Put<TRequest, TResponse>(
         this IHttpClientBuilder builder,
         Expression<Func<TRequest, string>> configureRoute,
-        Action<IHttpRequestBuilder<TRequest>> configureRequest)
+        Action<IHttpRequestBuilder<TRequest, TResponse>> configureRequest)
         where TRequest : IHttpRequest<TResponse>
     {
         CheckArgumentsAndThrowIfAnyIsNull(builder, configureRoute, configureRequest);
         
         builder.Services.ConfigureMethodAndEndpointFor<TRequest, TResponse>(builder.Name, HttpMethod.Put, configureRoute);
         
-        var requestBuilder = new DefaultHttpRequestBuilder<TRequest>(builder.Services);
+        var requestBuilder = new DefaultHttpRequestBuilder<TRequest, TResponse>(builder.Services);
         configureRequest.Invoke(requestBuilder);
         return builder;
     }
@@ -166,9 +164,9 @@ public static class HttpClientBuilderExtensions
     public static IHttpClientBuilder Put<TRequest, TResponse>(
         this IHttpClientBuilder builder,
         string route,
-        Action<IHttpRequestBuilder<TRequest>> configureRequest)
+        Action<IHttpRequestBuilder<TRequest, TResponse>> configureRequest)
         where TRequest : IHttpRequest<TResponse>
-        => builder.Put<TRequest, TResponse>(_ => route, configureRequest);
+        => builder.Put(_ => route, configureRequest);
     
     
     /// <summary>
@@ -182,14 +180,14 @@ public static class HttpClientBuilderExtensions
     public static IHttpClientBuilder Patch<TRequest, TResponse>(
         this IHttpClientBuilder builder,
         Expression<Func<TRequest, string>> configureRoute,
-        Action<IHttpRequestBuilder<TRequest>> configureRequest)
+        Action<IHttpRequestBuilder<TRequest, TResponse>> configureRequest)
         where TRequest : IHttpRequest<TResponse>
     {
         CheckArgumentsAndThrowIfAnyIsNull(builder, configureRoute, configureRequest);
         
         builder.Services.ConfigureMethodAndEndpointFor<TRequest, TResponse>(builder.Name, new HttpMethod("PATCH"), configureRoute);
         
-        var requestBuilder = new DefaultHttpRequestBuilder<TRequest>(builder.Services);
+        var requestBuilder = new DefaultHttpRequestBuilder<TRequest, TResponse>(builder.Services);
         configureRequest.Invoke(requestBuilder);
         return builder;
     }
@@ -205,9 +203,9 @@ public static class HttpClientBuilderExtensions
     public static IHttpClientBuilder Patch<TRequest, TResponse>(
         this IHttpClientBuilder builder,
         string route,
-        Action<IHttpRequestBuilder<TRequest>> configureRequest)
+        Action<IHttpRequestBuilder<TRequest, TResponse>> configureRequest)
         where TRequest : IHttpRequest<TResponse>
-        => builder.Patch<TRequest, TResponse>(_ => route, configureRequest);
+        => builder.Patch(_ => route, configureRequest);
     
     
     /// <summary>
@@ -221,14 +219,14 @@ public static class HttpClientBuilderExtensions
     public static IHttpClientBuilder Delete<TRequest, TResponse>(
         this IHttpClientBuilder builder,
         Expression<Func<TRequest, string>> configureRoute,
-        Action<IHttpRequestBuilder<TRequest>> configureRequest)
+        Action<IHttpRequestBuilder<TRequest, TResponse>> configureRequest)
         where TRequest : IHttpRequest<TResponse>
     {
         CheckArgumentsAndThrowIfAnyIsNull(builder, configureRoute, configureRequest);
         
         builder.Services.ConfigureMethodAndEndpointFor<TRequest, TResponse>(builder.Name, HttpMethod.Delete, configureRoute);
         
-        var requestBuilder = new DefaultHttpRequestBuilder<TRequest>(builder.Services);
+        var requestBuilder = new DefaultHttpRequestBuilder<TRequest, TResponse>(builder.Services);
         configureRequest.Invoke(requestBuilder);
         return builder;
     }
@@ -245,11 +243,11 @@ public static class HttpClientBuilderExtensions
     public static IHttpClientBuilder Delete<TRequest, TResponse>(
         this IHttpClientBuilder builder,
         string route,
-        Action<IHttpRequestBuilder<TRequest>> configureRequest)
+        Action<IHttpRequestBuilder<TRequest, TResponse>> configureRequest)
         where TRequest : IHttpRequest<TResponse>
-        => builder.Delete<TRequest, TResponse>(_ => route, configureRequest);
-    
-
+        => builder.Delete(_ => route, configureRequest);
+  
+   
     private static void ConfigureMethodAndEndpointFor<TRequest, TResponse>(
         this IServiceCollection services, 
         string clientName, 
@@ -257,34 +255,23 @@ public static class HttpClientBuilderExtensions
         Expression<Func<TRequest, string>> configureRoute)
     {
         Debug.WriteLine($"Registering [{method}] request for client '{clientName}' with types [{typeof(TRequest)}:{typeof(TResponse)}]");
-
         services.AddSingleton<IClientNameGetter<TRequest>, DefaultClientNameGetter<TRequest>>(
             _ => new DefaultClientNameGetter<TRequest>(clientName));
+        
+        services.AddSingleton<IRequestNameGetter<TRequest>, DefaultRequestNameGetter<TRequest>>(
+            _ => new DefaultRequestNameGetter<TRequest>(typeof(TRequest).Name));
         
         services.AddSingleton<IHttpMethodGetter<TRequest>, DefaultHttpMethodGetter<TRequest>>(
             _ => new DefaultHttpMethodGetter<TRequest>(method));
         
         services.AddSingleton<IEndpointBuilder<TRequest>, DefaultEndpointBuilder<TRequest>>(
             _ => new DefaultEndpointBuilder<TRequest>(configureRoute));
-
-        if (Empty.Value is TResponse)
-        {
-            services.AddSingleton<IResponseDeserializer<TRequest, TResponse>>(_ => 
-                (IResponseDeserializer<TRequest, TResponse>)new EmptyResponseDeserializer<TRequest>());
-        }
-        else
-        {
-            services.AddSingleton<
-                IResponseDeserializer<TRequest, TResponse>, 
-                DefaultResponseDeserializer<TRequest, TResponse>>(
-                _ => new DefaultResponseDeserializer<TRequest, TResponse>(JsonSerializerOptionsCache.CamelCase));
-        }
     }
     
-    private static void CheckArgumentsAndThrowIfAnyIsNull<TRequest>(
+    private static void CheckArgumentsAndThrowIfAnyIsNull<TRequest, TResponse>(
         IHttpClientBuilder builder, 
         Expression<Func<TRequest, string>> configureRoute, 
-        Action<IHttpRequestBuilder<TRequest>> configureRequest)
+        Action<IHttpRequestBuilder<TRequest, TResponse>> configureRequest)
     {
         if (builder == null) throw new ArgumentNullException(nameof(builder));
         if (configureRoute == null) throw new ArgumentNullException(nameof(configureRoute));

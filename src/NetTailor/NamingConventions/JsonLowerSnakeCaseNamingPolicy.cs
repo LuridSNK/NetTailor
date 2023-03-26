@@ -32,7 +32,9 @@ internal class JsonLowerSnakeCaseNamingPolicy : JsonNamingPolicy
                 char currentChar = srcName[srcIndex];
 
                 if (srcIndex > 0 && char.IsUpper(currentChar) &&
-                    (char.IsLower(srcName[srcIndex - 1]) || (srcIndex < srcName.Length - 1 && char.IsLower(srcName[srcIndex + 1]))) && srcName[srcIndex - 1] != '_')
+                    (char.IsLower(srcName[srcIndex - 1]) ||
+                     (srcIndex < srcName.Length - 1 && char.IsLower(srcName[srcIndex + 1]))) &&
+                    srcName[srcIndex - 1] != '_')
                 {
                     chars[targetIndex++] = '_';
                 }

@@ -1,8 +1,6 @@
 ﻿#nullable enable
 
 using System.Collections;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Text;
 using System.Text.Json;
 
@@ -10,19 +8,26 @@ namespace NetTailor.Extensions;
 
 public static class QueryStringBuilder
 {
-    private static readonly Dictionary<Type, List<PropertyAccessor>> PropertyAccessorsCache = new();
-
     private const string ErrorMessage =
         "An object can be either an anonymous type or concrete, but cannot be an instance of IConvertible";
 
-    public static string Build(StringBuilder queryStringBuilder, object? target, JsonNamingPolicy? policy = null)
+    public static string Build<T>(StringBuilder stringBuilder, T? target, JsonNamingPolicy? policy = null)
     {
         if (target == null) return string.Empty;
-        var type = target.GetType();
-
+        var type = typeof(T);
         if (IsUnsupported(type)) throw new InvalidOperationException(ErrorMessage);
 
-        var accessors = GetPropertyAccessors(type);
+        if (target is Dictionary<string, string> stringDict)
+        {
+            return BuildFromDictionary(stringBuilder, stringDict, policy);
+        }
+        
+        if (target is Dictionary<string, IEnumerable<string>> stringCollectionDict)
+        {
+            return BuildFromDictionary(stringBuilder, stringCollectionDict, policy);
+        }
+
+        var accessors = PropertyAccessorFactory<T>.GetPropertyAccessors();
         var isFirstProperty = true;
 
         foreach (var accessor in accessors)
@@ -32,11 +37,11 @@ public static class QueryStringBuilder
             {
                 if (!isFirstProperty)
                 {
-                    queryStringBuilder.Append('&');
+                    stringBuilder.Append('&');
                 }
                 else
                 {
-                    queryStringBuilder.Append('?');
+                    stringBuilder.Append('?');
                     isFirstProperty = false;
                 }
 
@@ -47,76 +52,70 @@ public static class QueryStringBuilder
                     {
                         if (index > 0)
                         {
-                            queryStringBuilder.Append('&');
+                            stringBuilder.Append('&');
                         }
 
-                        queryStringBuilder.Append(Uri.EscapeDataString(policy?.ConvertName(accessor.PropertyName) ?? accessor.PropertyName));
-                        queryStringBuilder.Append('=');
-                        queryStringBuilder.Append(Uri.EscapeDataString(item.ToString()!));
+                        stringBuilder.Append(Uri.EscapeDataString(policy?.ConvertName(accessor.PropertyName) ?? accessor.PropertyName));
+                        stringBuilder.Append('=');
+                        stringBuilder.Append(Uri.EscapeDataString(item.ToString()!));
                         index++;
                     }
                 }
                 else
                 {
-                    queryStringBuilder.Append(Uri.EscapeDataString(policy?.ConvertName(accessor.PropertyName) ?? accessor.PropertyName));
-                    queryStringBuilder.Append('=');
-                    queryStringBuilder.Append(Uri.EscapeDataString(value.ToString()!));
+                    stringBuilder.Append(Uri.EscapeDataString(policy?.ConvertName(accessor.PropertyName) ?? accessor.PropertyName));
+                    stringBuilder.Append('=');
+                    stringBuilder.Append(Uri.EscapeDataString(value.ToString()!));
                 }
             }
         }
 
-        return queryStringBuilder.ToString();
+        return stringBuilder.ToString();
     }
-
-    private static List<PropertyAccessor> GetPropertyAccessors(Type type)
+    
+    private static string BuildFromDictionary(StringBuilder sb, Dictionary<string, string> dict, JsonNamingPolicy? policy = null)
     {
-        if (!PropertyAccessorsCache.TryGetValue(type, out var accessors))
+        sb.Append('?');
+        for (var i = 0; i < dict.Count; i++)
         {
-            accessors = new List<PropertyAccessor>();
+            var kvp = dict.ElementAt(i);
+            sb.AppendFormat("{0}={1}", policy?.ConvertName(kvp.Key) ?? kvp.Key, kvp.Value);
+            if (i < dict.Count - 1) sb.Append('&');
+        }
 
-            var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-            foreach (var property in properties)
+        return sb.ToString();
+    }
+    
+    private static string BuildFromDictionary(StringBuilder sb, Dictionary<string, IEnumerable<string>> dict, JsonNamingPolicy? policy = null)
+    {
+        sb.Append('?');
+        for (var i = 0; i < dict.Count; i++)
+        {
+            var kvp = dict.ElementAt(i);
+            foreach (var val in kvp.Value)
             {
-                if (property.CanRead)
-                {
-                    var getter = CompileGetter(property);
-                    accessors.Add(new PropertyAccessor(property.Name, getter));
-                }
+                sb.AppendFormat("{0}={1}", policy?.ConvertName(kvp.Key) ?? kvp.Key, val);
+                sb.Append('&');
             }
-
-            PropertyAccessorsCache[type] = accessors;
         }
 
-        return accessors;
+        sb.Remove(sb.Length - 1, 1);
+        
+        return sb.ToString();
     }
-
-
+  
     private static readonly Type ConvertibleType = typeof(IConvertible);
-    
-    private static bool IsUnsupported(Type type) => 
-        ConvertibleType.IsAssignableFrom(type);
-    
-    private static Func<object, object> CompileGetter(PropertyInfo property)
+    private static bool IsUnsupported(Type type) => ConvertibleType.IsAssignableFrom(type);
+}
+
+internal class PropertyAccessor<TObj>
+{
+    public string PropertyName { get; }
+    public Func<TObj, object> Getter { get; }
+
+    public PropertyAccessor(string propertyName, Func<TObj, object> getter)
     {
-        var instance = Expression.Parameter(typeof(object), "instance");
-        var castedInstance = Expression.Convert(instance, property.DeclaringType);
-        var propertyAccess = Expression.Property(castedInstance, property);
-        var result = Expression.Convert(propertyAccess, typeof(object));
-        var lambda = Expression.Lambda<Func<object, object>>(result, instance);
-
-        return lambda.Compile();
-    }
-
-    private class PropertyAccessor
-    {
-        public string PropertyName { get; }
-        public Func<object, object> Getter { get; }
-
-        public PropertyAccessor(string propertyName, Func<object, object> getter)
-        {
-            PropertyName = propertyName;
-            Getter = getter;
-        }
+        PropertyName = propertyName;
+        Getter = getter;
     }
 }

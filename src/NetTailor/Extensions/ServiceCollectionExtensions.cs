@@ -6,6 +6,7 @@ using Microsoft.Extensions.ObjectPool;
 using Microsoft.IO;
 using NetTailor.Abstractions;
 using NetTailor.Defaults;
+using NetTailor.Defaults.ContentSerializers;
 using NetTailor.Utilities;
 
 namespace NetTailor.Extensions;
@@ -82,8 +83,9 @@ public static class HttpProfilesServiceCollectionExtensions
             return provider.Create(policy);
         });
         services.TryAddSingleton<RecyclableMemoryStreamManager>();
-        services.TryAddSingleton<IExecutionStrategyProvider, DefaultExecutionStrategyProvider>();
+        services.TryAddSingleton<IRequestExecutionContextFactory, DefaultRequestExecutionContextFactory>();
         services.TryAddSingleton<IHttpDispatcher, DefaultHttpRequestDispatcher>();
+        services.TryAddSingleton<IContentWriterReaderFactory, ContentContentWriterReaderFactory>();
         
         Debug.WriteLine("All required utility dependencies has been registered!");
         return services;

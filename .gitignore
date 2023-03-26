@@ -33,3 +33,4 @@ Benchmarks
 docs/_build
 /src/LastMajorVersionBinary
 *.diagsession
+src/NetTailor/WorkInProgress.cs
