@@ -17,6 +17,7 @@
 
     <ItemGroup>
       <PackageReference Include="FastExpressionCompiler" Version="3.3.4" />
+      <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
       <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />

@@ -1,10 +1,9 @@
 ﻿using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using NetTailor.Defaults.ContentSerializers;
+using NetTailor.Abstractions;
 
-namespace NetTailor.Abstractions;
+namespace NetTailor;
 
 /// <summary>
 /// An interface for configuring a request
@@ -42,9 +41,17 @@ public interface IHttpRequestBuilder<TRequest, TResponse>
     public IHttpRequestBuilder<TRequest, TResponse> Headers(Action<TRequest, HttpRequestHeaders> configureHeaders);
 
 
+    /// <summary>
+    /// Allows to override the default camelCase reader and use a custom one.
+    /// </summary>
+    /// <typeparam name="TContentReader"><see cref="IContentReader"/></typeparam>
     public IHttpRequestBuilder<TRequest, TResponse> UseContentReader<TContentReader>()
         where TContentReader : class, IContentReader;
 
+    /// <summary>
+    /// Allows to override the default camelCase writer and use a custom one.
+    /// </summary>
+    /// <typeparam name="TContentWriter"><see cref="IContentWriter"/></typeparam>
     public IHttpRequestBuilder<TRequest, TResponse> UseContentWriter<TContentWriter>()
         where TContentWriter : class, IContentWriter;
 }

@@ -2,7 +2,7 @@
 
 namespace NetTailor;
 
-public interface IHttpDispatcher
+public interface IRequestDispatcher
 {
     /// <summary>
     /// 
@@ -12,8 +12,8 @@ public interface IHttpDispatcher
     /// <typeparam name="TRequest"></typeparam>
     /// <typeparam name="TResponse"></typeparam>
     /// <returns></returns>
-    public Task<HttpResult<TResponse>> Dispatch<TRequest, TResponse>(TRequest request, CancellationToken ct = default)
-        where TRequest : IHttpRequest<TResponse>
+    public Task<HttpResult<TResponse?>> Dispatch<TRequest, TResponse>(TRequest request, CancellationToken ct = default)
+        where TRequest : IRequest<TResponse>
         where TResponse : class;
 
     /// <summary>
@@ -24,5 +24,5 @@ public interface IHttpDispatcher
     /// <typeparam name="TRequest"></typeparam>
     /// <returns></returns>
     public Task<HttpResult<Empty>> Dispatch<TRequest>(TRequest request, CancellationToken ct = default)
-        where TRequest : IHttpRequest<Empty>;
+        where TRequest : IRequest<Empty>;
 }

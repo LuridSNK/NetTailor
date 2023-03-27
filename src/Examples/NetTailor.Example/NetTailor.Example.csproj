@@ -16,4 +16,11 @@
       <ProjectReference Include="..\..\NetTailor\NetTailor.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="sample_upload.txt" />
+      <Content Include="sample_upload.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

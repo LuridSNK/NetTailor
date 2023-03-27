@@ -31,5 +31,5 @@ public struct Empty : IEquatable<Empty>, IComparable<Empty>, IComparable
 
     public static bool operator !=(Empty first, Empty second) => false;
 
-    public override string ToString() => "Empty";
+    public override string ToString() => nameof(Empty);
 }

@@ -5,9 +5,9 @@ public static class HttpResults
     /// <summary>
     /// Creates a new instance of <see cref="HttpResult{TResult}"/> with the <see cref="Exception"/> as an Failure.
     /// </summary>
-    public static HttpResult<TResult> Failure<TResult>(Exception ex) where TResult : class
+    public static HttpResult<TResult?> Failure<TResult>(Exception ex) where TResult : class
     {
-        return new HttpResult<TResult>(null, false, ex);
+        return new HttpResult<TResult?>(null, false, ex);
     }
 
     /// <summary>

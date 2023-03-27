@@ -15,19 +15,18 @@ public sealed class ExampleClientProfile : IHttpServiceProfile
 
     public void Configure(IHttpServiceBuilder builder)
     {
-        var uri = _configuration["SecondClient:Uri"]!;
-        var scheme = _configuration["SecondClient:Scheme"]!;
-        var token = _configuration["SecondClient:Token"]!;
-        var client = builder.Create(client =>
-            {
-                client.BaseAddress = new Uri(uri);
-                client.DefaultRequestHeaders.Add("Default", "Request-Header");
-            })
-            ;
-
-        SampleRequests.SetupSimpleGet(client);
-        SampleRequests.SetupSimplePost(client);
-        SampleRequests.SetupSimpleDelete(client);
+        var uri = _configuration["Api:Uri"];
+        var clientBuilder = builder.Create(client =>
+        {
+            client.BaseAddress = new Uri(uri);
+            client.DefaultRequestHeaders.Add("Default", "Request-Header");
+        });
+        
+        SampleRequests.SetupSimpleGet(clientBuilder);
+        SampleRequests.SetupSimplePost(clientBuilder);
+        SampleRequests.SetupSimpleDelete(clientBuilder);
+        SampleRequests.SetupUpload(clientBuilder);
+        SampleRequests.SetupDownload(clientBuilder);
     }
 }
 
@@ -49,7 +48,7 @@ public static class SampleRequests
 
     public static void SetupSimplePost(IHttpClientBuilder builder)
     {
-        builder.Post<SimplePost, SimplePostResponse>("sample",
+        builder.Post<SamplePost, SamplePostResponse>("sample",
             requestBuilder =>
             {
                 requestBuilder.Content(c => new { c.Items });
@@ -62,7 +61,25 @@ public static class SampleRequests
 
     public static void SetupSimpleDelete(IHttpClientBuilder builder)
     {
-        builder.Delete<SimpleDelete, Empty>(r => $"sample/{r.Id}",
-            _ => { });
+        builder.Delete<SampleDelete, Empty>(r => $"sample/{r.Id}",
+            requestBuilder =>
+            {
+                requestBuilder.Headers((_, h) =>
+                {
+                    h.Authorization = new AuthenticationHeaderValue("Bearer", "12345");
+                });
+            });
+    }
+
+    public static void SetupUpload(IHttpClientBuilder builder)
+    {
+        builder.Post<SampleFileUpload, SampleFileUploadResponse>(
+            "/files",
+            requestBuilder => requestBuilder.Content(r => r.Content));
+    }
+
+    public static void SetupDownload(IHttpClientBuilder builder)
+    {
+        builder.Get<SampleFileDownload, Stream>(r => $"files/{r.Id}");
     }
 }

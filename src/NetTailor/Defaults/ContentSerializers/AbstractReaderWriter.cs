@@ -1,5 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Xml;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.IO;
 using NetTailor.Abstractions;
 using NetTailor.Extensions;
@@ -14,6 +16,8 @@ public abstract class AbstractReaderWriter : IContentReader, IContentWriter
     {
         CharSet = "utf-8"
     };
+    
+    private readonly FileExtensionContentTypeProvider _contentTypeProvider = new();
 
     protected AbstractReaderWriter(RecyclableMemoryStreamManager memoryStreamManager)
     {
@@ -31,16 +35,48 @@ public abstract class AbstractReaderWriter : IContentReader, IContentWriter
 #else
         var stream = await content.ReadAsStreamAsync();
 #endif
+        if (stream is TObject obj)
+        {
+            return obj;
+        }
+        
         return await JsonSerializer.DeserializeAsync<TObject>(stream, Options, ct);
     }
 
     public async ValueTask<HttpContent?> Write<TObject>(TObject value, CancellationToken ct = default)
     {
         if (value is null) return null;
+        if (value is Stream s) return ProcessStream(s);
+
         var stream = _memoryStreamManager.GetStream();
         await JsonSerializer.SerializeAsync(stream, value, Options, ct);
         var byteArrayContent = new ByteArrayContent(stream.ToArray());
         byteArrayContent.Headers.ContentType = _mediaType;
         return byteArrayContent;
+    }
+
+    private HttpContent ProcessStream(Stream stream)
+    {
+        string? fileName = null;
+        var contentType = "application/octet-stream";
+        if (stream is FileStream fs)
+        {
+            fileName = fs.Name;
+           contentType = _contentTypeProvider.TryGetContentType(fs.Name, out var type) ? type : contentType;
+        }
+        
+        var content = new StreamContent(stream);
+        content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+        var form = new MultipartFormDataContent();
+        if (fileName is not null)
+        {
+            form.Add(content, "file", fileName);
+        }
+        else
+        {
+            form.Add(content, "file");
+        }
+
+        return form;
     }
 }

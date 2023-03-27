@@ -82,9 +82,10 @@ public static class HttpProfilesServiceCollectionExtensions
             var policy = new StringBuilderPooledObjectPolicy();
             return provider.Create(policy);
         });
+        services.TryAddSingleton<CamelCase>();
         services.TryAddSingleton<RecyclableMemoryStreamManager>();
         services.TryAddSingleton<IRequestExecutionContextFactory, DefaultRequestExecutionContextFactory>();
-        services.TryAddSingleton<IHttpDispatcher, DefaultHttpRequestDispatcher>();
+        services.TryAddSingleton<IRequestDispatcher, DefaultRequestDispatcher>();
         services.TryAddSingleton<IContentWriterReaderFactory, ContentContentWriterReaderFactory>();
         
         Debug.WriteLine("All required utility dependencies has been registered!");

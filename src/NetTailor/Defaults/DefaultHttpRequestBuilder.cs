@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
 using NetTailor.Abstractions;
 using NetTailor.Defaults.ContentSerializers;
+using NetTailor.ExpressionAnalysis;
 
 namespace NetTailor.Defaults;
 
@@ -22,7 +23,9 @@ internal sealed class DefaultHttpRequestBuilder<TRequest, TResponse> : IHttpRequ
     public IHttpRequestBuilder<TRequest, TResponse> Content(Expression<Func<TRequest, object>> configureContent)
     {
         if (configureContent == null) throw new ArgumentNullException(nameof(configureContent));
-
+#if DEBUG
+        ExpressionAnalyzer.Analyze(configureContent);
+#endif
         Services.AddSingleton<IRequestBodyShaper<TRequest>, DefaultRequestBodyShaper<TRequest>>(
             _ => new DefaultRequestBodyShaper<TRequest>(configureContent));
 
@@ -32,7 +35,9 @@ internal sealed class DefaultHttpRequestBuilder<TRequest, TResponse> : IHttpRequ
     public IHttpRequestBuilder<TRequest, TResponse> Query(Expression<Func<TRequest, object>> configureQuery, Naming? naming = default)
     {
         if (configureQuery == null) throw new ArgumentNullException(nameof(configureQuery));
-        
+#if DEBUG
+        ExpressionAnalyzer.Analyze(configureQuery);
+#endif
         var namingPolicy = NamingPolicies.GetNamingPolicyOrDefault(naming);
         Services.AddSingleton<IQueryStringBuilder<TRequest>, DefaultQueryStringBuilder<TRequest>>(sp =>
         {
@@ -48,7 +53,9 @@ internal sealed class DefaultHttpRequestBuilder<TRequest, TResponse> : IHttpRequ
     public IHttpRequestBuilder<TRequest, TResponse> Headers(Action<TRequest, HttpRequestHeaders> configureHeaders)
     {
         if (configureHeaders == null) throw new ArgumentNullException(nameof(configureHeaders));
-        
+#if DEBUG
+        ExpressionAnalyzer.AnalyzeAction(configureHeaders);
+#endif
         Services.AddSingleton<IHeaderProvider<TRequest>, DefaultHeaderProvider<TRequest>>(
             _ => new DefaultHeaderProvider<TRequest>(configureHeaders));
         return this;

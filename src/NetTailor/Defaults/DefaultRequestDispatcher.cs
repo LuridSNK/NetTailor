@@ -5,17 +5,17 @@ using NetTailor.Contracts;
 
 namespace NetTailor.Defaults;
 
-public class DefaultHttpRequestDispatcher : IHttpDispatcher
+public class DefaultRequestDispatcher : IRequestDispatcher
 {
     private readonly IRequestExecutionContextFactory _contextFactory;
 
-    public DefaultHttpRequestDispatcher(IRequestExecutionContextFactory contextFactory)
+    public DefaultRequestDispatcher(IRequestExecutionContextFactory contextFactory)
     {
         _contextFactory = contextFactory;
     }
     
-    public async Task<HttpResult<TResponse>> Dispatch<TRequest, TResponse>(TRequest request, CancellationToken ct = default) 
-        where TRequest : IHttpRequest<TResponse>
+    public async Task<HttpResult<TResponse?>> Dispatch<TRequest, TResponse>(TRequest request, CancellationToken ct = default) 
+        where TRequest : IRequest<TResponse>
         where TResponse : class 
     {
         if (request == null) return HttpResults.Failure<TResponse>(new ArgumentNullException(nameof(request)));
@@ -45,7 +45,7 @@ public class DefaultHttpRequestDispatcher : IHttpDispatcher
         }
         
         Debug.WriteLine(httpResponse);
-
+        
         var value = await ctx.ContentReader.Read<TResponse>(httpResponse.Content!, ct);
         
         if (value is null)
@@ -59,7 +59,7 @@ public class DefaultHttpRequestDispatcher : IHttpDispatcher
     }
 
     public async Task<HttpResult<Empty>> Dispatch<TRequest>(TRequest request, CancellationToken ct = default) 
-        where TRequest : IHttpRequest<Empty>
+        where TRequest : IRequest<Empty>
     {
         if (request == null) return HttpResults.Failure(new ArgumentNullException(nameof(request)));
         
