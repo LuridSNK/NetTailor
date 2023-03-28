@@ -1,12 +1,14 @@
-﻿using System.Linq.Expressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using FastExpressionCompiler;
 using NetTailor.Abstractions;
 
 namespace NetTailor.Defaults;
 
-internal sealed class DefaultEndpointBuilder<TRequest> : IEndpointBuilder<TRequest> 
+internal sealed class DefaultEndpointBuilder<TRequest> : IEndpointBuilder<TRequest>
 {
     private readonly Func<TRequest, string> _routeBuilder;
+
     public DefaultEndpointBuilder(Expression<Func<TRequest, string>> routeConfiguration)
     {
         _routeBuilder = routeConfiguration.CompileFast();

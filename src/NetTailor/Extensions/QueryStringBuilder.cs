@@ -26,7 +26,7 @@ internal static class QueryStringBuilder
             return BuildFromDictionary(stringBuilder, stringCollectionDict, policy);
         }
 
-        var accessors = PropertyAccessorFactory<T>.GetPropertyAccessors();
+        var accessors = PropertyAccessorFactory.GetPropertyAccessors(target);
         var isFirstProperty = true;
 
         foreach (var accessor in accessors)

@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using System.Text;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
@@ -49,7 +50,7 @@ internal sealed class DefaultHttpRequestBuilder<TRequest, TResponse> : IHttpRequ
         });
         return this;
     }
-
+    
     public IHttpRequestBuilder<TRequest, TResponse> Headers(Action<TRequest, HttpRequestHeaders> configureHeaders)
     {
         if (configureHeaders == null) throw new ArgumentNullException(nameof(configureHeaders));
@@ -84,6 +85,20 @@ internal sealed class DefaultHttpRequestBuilder<TRequest, TResponse> : IHttpRequ
             options.ContentWriter = provider => provider.GetRequiredService<TContentWriter>();
         });
         
+        return this;
+    }
+    
+    public IHttpRequestBuilder<TRequest, TResponse> Form(Expression<Func<TRequest, object>> configureForm)
+    {
+        if (configureForm == null) throw new ArgumentNullException(nameof(configureForm));
+#if DEBUG
+        ExpressionAnalyzer.Analyze(configureForm);
+#endif
+        Services.AddSingleton<IFormBuilder<TRequest>, DefaultFormBuilder<TRequest>>(sp =>
+        {
+            var provider = sp.GetRequiredService<IContentTypeProvider>();
+            return new DefaultFormBuilder<TRequest>(configureForm, provider);
+        });
         return this;
     }
 }

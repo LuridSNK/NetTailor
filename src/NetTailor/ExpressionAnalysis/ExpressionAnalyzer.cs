@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Text;
-using Microsoft.Extensions.Primitives;
 
 namespace NetTailor.ExpressionAnalysis;
 
@@ -19,6 +18,20 @@ internal static class ExpressionAnalyzer
             else
             {
                 sb.Append($"\nThe operand is not a member expression, actual type is {configure.Body.Type}");
+            }
+        }
+        if (configure.Body is NewExpression newExpression)
+        {
+            sb.Append($"\tThe new expression type is: {newExpression.Type}");
+            sb.Append("\n\tThe new expression arguments are:");
+            foreach (var argument in newExpression.Arguments)
+            {
+                sb.Append($"\n\t > {argument.Type}");
+            }
+            sb.Append("\n\tThe new expression members are:");
+            foreach (var argument in newExpression.Members)
+            {
+                sb.Append($"\n\t > {argument.Name}: {argument.MemberType}");
             }
         }
         else
