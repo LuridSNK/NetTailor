@@ -1,6 +1,5 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json;
-using System.Xml;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.IO;
 using NetTailor.Abstractions;
@@ -8,20 +7,21 @@ using NetTailor.Extensions;
 
 namespace NetTailor.Defaults.ContentSerializers;
 
-public abstract class AbstractReaderWriter : IContentReader, IContentWriter
+public abstract class AbstractContentReaderWriter : IContentReader, IContentWriter
 {
     private readonly RecyclableMemoryStreamManager _memoryStreamManager;
+    private readonly IContentTypeProvider _contentTypeProvider;
     
     private readonly MediaTypeHeaderValue _mediaType = new("application/json")
     {
         CharSet = "utf-8"
     };
-    
-    private readonly FileExtensionContentTypeProvider _contentTypeProvider = new();
 
-    protected AbstractReaderWriter(RecyclableMemoryStreamManager memoryStreamManager)
+    protected AbstractContentReaderWriter(RecyclableMemoryStreamManager memoryStreamManager, 
+        IContentTypeProvider contentTypeProvider)
     {
         _memoryStreamManager = memoryStreamManager;
+        _contentTypeProvider = contentTypeProvider;
     }
     
     protected virtual JsonSerializerOptions Options => JsonSerializerOptionsCache.CamelCase;

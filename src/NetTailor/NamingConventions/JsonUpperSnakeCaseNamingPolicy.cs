@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 
 namespace NetTailor.NamingConventions;
 
@@ -61,4 +62,3 @@ internal class JsonUpperSnakeCaseNamingPolicy : JsonNamingPolicy
 #endif
     }
 }
-

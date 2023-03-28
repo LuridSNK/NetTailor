@@ -3,51 +3,51 @@ using System.Reflection;
 
 namespace NetTailor.Extensions;
 
-internal static class PropertyAccessorFactory<T>
+internal static class PropertyAccessorFactory
 {
-    private static readonly Dictionary<Type, List<PropertyAccessor<T>>> PropertyAccessorsCache = new();
+    private static readonly Dictionary<Type, List<PropertyAccessor>> PropertyAccessorsCache = new();
     
-    private static Type Type { get; } = typeof(T);
-    private static PropertyInfo[] Properties { get; } = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
-    internal static List<PropertyAccessor<T>> GetPropertyAccessors()
+    internal static List<PropertyAccessor> GetPropertyAccessors(object obj)
     {
-        if (!PropertyAccessorsCache.TryGetValue(Type, out var accessors))
+        var type = obj.GetType();
+        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        if (!PropertyAccessorsCache.TryGetValue(type, out var accessors))
         {
-            accessors = new List<PropertyAccessor<T>>();
+            accessors = new List<PropertyAccessor>();
 
-            foreach (var property in Properties)
+            foreach (var property in properties)
             {
                 if (property.CanRead)
                 {
                     var getter = CompileGetter(property);
-                    accessors.Add(new PropertyAccessor<T>(property.Name, getter));
+                    accessors.Add(new PropertyAccessor(property.Name, getter));
                 }
             }
 
-            PropertyAccessorsCache[Type] = accessors;
+            PropertyAccessorsCache[type] = accessors;
         }
 
         return accessors;
     }
     
-    private static Func<T, object> CompileGetter(PropertyInfo property)
+    private static Func<object, object> CompileGetter(PropertyInfo property)
     {
         var instance = Expression.Parameter(typeof(object), "instance");
         var castedInstance = Expression.Convert(instance, property.DeclaringType);
         var propertyAccess = Expression.Property(castedInstance, property);
         var result = Expression.Convert(propertyAccess, typeof(object));
-        var lambda = Expression.Lambda<Func<T, object>>(result, instance);
+        var lambda = Expression.Lambda<Func<object, object>>(result, instance);
 
         return lambda.Compile();
     }
 }
 
-internal class PropertyAccessor<TObj>
+internal class PropertyAccessor
 {
     public string PropertyName { get; }
-    public Func<TObj, object> Getter { get; }
+    public Func<object, object> Getter { get; }
 
-    public PropertyAccessor(string propertyName, Func<TObj, object> getter)
+    public PropertyAccessor(string propertyName, Func<object, object> getter)
     {
         PropertyName = propertyName;
         Getter = getter;
