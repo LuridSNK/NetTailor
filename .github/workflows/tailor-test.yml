@@ -9,10 +9,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        dotnet-version: [6.0.407, 7.0.202]
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -20,7 +16,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: ${{ matrix.dotnet-version }}
+        dotnet-version: 7.0.202
 
     - name: Restore dependencies
       run: dotnet restore ./src/NetTailor.sln
