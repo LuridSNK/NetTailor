@@ -41,3 +41,15 @@ internal static class PropertyAccessorFactory<T>
         return lambda.Compile();
     }
 }
+
+internal class PropertyAccessor<TObj>
+{
+    public string PropertyName { get; }
+    public Func<TObj, object> Getter { get; }
+
+    public PropertyAccessor(string propertyName, Func<TObj, object> getter)
+    {
+        PropertyName = propertyName;
+        Getter = getter;
+    }
+}

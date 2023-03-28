@@ -5,14 +5,14 @@
         <Nullable>enable</Nullable>
         <LangVersion>10</LangVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>0.1.0</Version>
+        <Version>0.1.0-preview</Version>
         <Title>NetTailor</Title>
         <Authors>Kirill Filippenko</Authors>
         <Description>Fluent HttpClient call configurator</Description>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <RepositoryUrl>https://github.com/LuridSNK/NetTailor</RepositoryUrl>
         <PackageTags>http http-client cqrs</PackageTags>
-        <TargetFrameworks>net6.0;net7.0;netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0;net6.0;net7.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>

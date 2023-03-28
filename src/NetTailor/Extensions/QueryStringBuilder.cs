@@ -6,16 +6,15 @@ using System.Text.Json;
 
 namespace NetTailor.Extensions;
 
-public static class QueryStringBuilder
+internal static class QueryStringBuilder
 {
-    private const string ErrorMessage =
-        "An object can be either an anonymous type or concrete, but cannot be an instance of IConvertible";
+    private const string IConvertibleErr = "An object cannot be an instance of IConvertible";
 
     public static string Build<T>(StringBuilder stringBuilder, T? target, JsonNamingPolicy? policy = null)
     {
         if (target == null) return string.Empty;
         var type = typeof(T);
-        if (IsUnsupported(type)) throw new InvalidOperationException(ErrorMessage);
+        if (IsUnsupported(type)) throw new InvalidOperationException(IConvertibleErr);
 
         if (target is Dictionary<string, string> stringDict)
         {
@@ -106,16 +105,4 @@ public static class QueryStringBuilder
   
     private static readonly Type ConvertibleType = typeof(IConvertible);
     private static bool IsUnsupported(Type type) => ConvertibleType.IsAssignableFrom(type);
-}
-
-internal class PropertyAccessor<TObj>
-{
-    public string PropertyName { get; }
-    public Func<TObj, object> Getter { get; }
-
-    public PropertyAccessor(string propertyName, Func<TObj, object> getter)
-    {
-        PropertyName = propertyName;
-        Getter = getter;
-    }
 }
