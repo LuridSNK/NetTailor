@@ -22,4 +22,4 @@ jobs:
       run: dotnet restore ./src/NetTailor.sln
 
     - name: Build and test
-      run: dotnet test ./src/NetTailor.sln --no-restore
+      run: dotnet test ./src/NetTailor.sln
