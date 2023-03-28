@@ -23,7 +23,7 @@ jobs:
         dotnet-version: ${{ matrix.dotnet-version }}
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore ./src/NetTailor.sln
 
     - name: Build and test
-      run: dotnet test
+      run: dotnet test ./src/NetTailor.sln --no-restore
