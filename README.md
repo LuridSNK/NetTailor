@@ -2,6 +2,10 @@
 ### Weave your network like a master craftsman.
 A library for fluent HttpClient configuration and CQRS-like usage.
 
+![CI](https://github.com/LuridSnk/NetTailor/workflows/CI/badge.svg)
+[![NuGet](https://img.shields.io/nuget/dt/nettailor.svg)](https://www.nuget.org/packages/nettailor)
+[![NuGet](https://img.shields.io/nuget/vpre/nettailor.svg)](https://www.nuget.org/packages/nettailor)
+
 ### Setting Up NetTailor
 
 Add [nuget](https://www.nuget.org/packages/NetTailor/) package or `dotnet add package NetTailor` in dotnet CLI.
