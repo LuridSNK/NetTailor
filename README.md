@@ -14,7 +14,8 @@ With .NET CLI:
 dotnet add package NetTailor
 ```
 ### Using NetTailor
-#### 1. Create your profile (or see an [example](https://github.com/LuridSNK/NetTailor/blob/master/src/Examples/NetTailor.Example/ExampleClientProfile.cs))
+Or use [example](https://github.com/LuridSNK/NetTailor/blob/master/src/Examples/NetTailor.Example/ExampleClientProfile.cs) code
+#### 1. Create your profile
 ```csharp
 // use against IServiceCollection
 var clientBuilder = services.AddHttpClientProfile("example", client =>
@@ -31,7 +32,6 @@ clientBuilder.Get<SampleGet, SampleGetResponse>(r => $"users/{r.Id}/friends", //
                 reqBuilder.Headers((_, h) => h.Add("PER-REQUEST-HEADER", "some-value"));
                 reqBuilder.Query(q => new { Sort = "Asc", OrderBy = nameof(q.Name) });
             });
-// translates to GET http://api.example.com/sample/1?sort=Asc&orderBy=Name
 ```
 #### - 3 Use it, by injecting `IRequestDispatcher` into your services
 ```csharp
