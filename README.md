@@ -4,9 +4,9 @@
 [![NuGet](https://img.shields.io/nuget/dt/nettailor.svg)](https://www.nuget.org/packages/nettailor)
 [![NuGet](https://img.shields.io/nuget/vpre/nettailor.svg)](https://www.nuget.org/packages/nettailor)
 
-Writing Http clients is a pain. 
-It's a lot of boilerplate code, and it's hard to maintain. 
-NetTailor is a library that helps you to write clients in a declarative way with a CQRS-like fashion.
+**NetTailor** simplifies development with a declarative, 
+CQRS-like approach that reduces boilerplate code and streamlines maintenance, 
+allowing you to focus on the data-in and data-out.
 
 ### Installing [NetTailor](https://www.nuget.org/packages/NetTailor)
 With .NET CLI:
@@ -14,7 +14,7 @@ With .NET CLI:
 dotnet add package NetTailor
 ```
 ### Using NetTailor
-#### - 1. Create your profile (or see an [example](https://github.com/LuridSNK/NetTailor/tree/master/src/Examples/NetTailor.Example))
+#### - 1. Create your profile (or see an [example](https://github.com/LuridSNK/NetTailor/blob/master/src/Examples/NetTailor.Example/ExampleClientProfile.cs))
 ```csharp
 // use against IServiceCollection
 var clientBuilder = services.AddHttpClientProfile("example", client =>
