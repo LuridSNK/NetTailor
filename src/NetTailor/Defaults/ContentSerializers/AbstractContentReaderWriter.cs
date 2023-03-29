@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Diagnostics;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.IO;
@@ -57,26 +58,8 @@ public abstract class AbstractContentReaderWriter : IContentReader, IContentWrit
 
     private HttpContent ProcessStream(Stream stream)
     {
-        string? fileName = null;
-        var contentType = "application/octet-stream";
-        if (stream is FileStream fs)
-        {
-            fileName = fs.Name;
-           contentType = _contentTypeProvider.TryGetContentType(fs.Name, out var type) ? type : contentType;
-        }
-        
-        var content = new StreamContent(stream);
-        content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
-        var form = new MultipartFormDataContent();
-        if (fileName is not null)
-        {
-            form.Add(content, "file", fileName);
-        }
-        else
-        {
-            form.Add(content, "file");
-        }
-
-        return form;
+        Debug.WriteLine($"{GetType()}: Processed stream instead of Json");
+        return new StreamContent(stream);
     }
+
 }
