@@ -1,86 +1,69 @@
-# NetTailor
-### Weave your network like a master craftsman.
-A library for fluent HttpClient configuration and CQRS-like usage.
-
+## NetTailor - Http weaved effortlessly
+***
 ![CI](https://github.com/LuridSNK/NetTailor/workflows/CI/badge.svg)
 [![NuGet](https://img.shields.io/nuget/dt/nettailor.svg)](https://www.nuget.org/packages/nettailor)
 [![NuGet](https://img.shields.io/nuget/vpre/nettailor.svg)](https://www.nuget.org/packages/nettailor)
 
-### Setting Up NetTailor
+Writing Http clients is a pain. 
+It's a lot of boilerplate code, and it's hard to maintain. 
+NetTailor is a library that helps you to write clients in a declarative way with a CQRS-like fashion.
 
-Add [nuget](https://www.nuget.org/packages/NetTailor/) package or `dotnet add package NetTailor` in dotnet CLI.
-
-## Defining profiles:
-
-There are two ways of setting up your HttpProfiles:
-
-1. Register it using fluent interfaces by calling `AddHttpClientProfile()` on `IServiceCollection`:
-
-```csharp
-// define client
-services.AddHttpClientProfile("MyFirstHttpService", client =>
-    {
-        client.BaseAddress = new Uri("https://example-website.com");
-        client.Timeout = TimeSpan.FromSeconds(30);
-    })
-    // configure default request headers if necessary
-    .AddDefaultHeaders(headers => headers.Add("my_default_header", "default_header_value"))
-    // configure your endpoint and message values
-    .Post<ServiceOneRequest, ServiceOneResponse>(
-        request => $"endpoint/{request.Id}",
-        builder =>
-    {
-        // set naming policy
-        builder.UseNaming(Naming.UpperSnakeCase);
-        // configure query, content and per-request headers
-        builder.Query(q => new { q.Name });
-        builder.Content(c => new { c.Id, c.CreatedAt }, Naming.LowerSnakeCase);
-        builder.Headers((_, headers) => headers            
-            .Add("per_reqest_header", "per_request_header_value")
-            .Add("another_one", "value_two"));
-    })
+### Installing [NetTailor](https://www.nuget.org/packages/NetTailor)
+With .NET CLI:
+```bash
+dotnet add package NetTailor
 ```
-
-2. Define your service by implementing `IHttpServiceProfile` interface, and register it using fluent interfaces by calling `AddHttpClientProfile<TProfile>();` on `IServiceCollection`:
-
+### Using NetTailor
+#### - 1. Create your profile (or see an [example](https://github.com/LuridSNK/NetTailor/tree/master/src/Examples/NetTailor.Example))
 ```csharp
-public sealed class MySecondHttpService : IHttpServiceProfile
+// use against IServiceCollection
+var clientBuilder = services.AddHttpClientProfile("example", client =>
 {
-    // convinient Dependency Injection
-    private readonly IConfiguration _configuration;
-
-    public SampleClientProfileTwo(IConfiguration configuration) => 
-        _configuration = configuration;
-
-    public void Configure(IHttpServiceBuilder builder)
-    {
-        var uri = _configuration.GetValue<string>("SecondService:Uri");
-        var scheme = _configuration.GetValue<string>("SecondService:Scheme");
-        var token = _configuration.GetValue<string>("SecondService:Token");
-        
-        // create a client definition
-        builder.Create(client =>
-            {
-                client.BaseAddress = new Uri(uri);
-            })
-            // add default headers
-            .AddDefaultHeaders(headers => headers
-                .Authorization(scheme, token))
-            // define your requests and values
-            .Get<ServiceTwoRequest, ServiceTwoResponse>(r => $"endpoint/{r.Id}", requestBuilder =>
-            {
-                requestBuilder.Query(q => new { Venom = "Snake", OcelotSays = new[] {"la", "le", "lu", "le", "lo"} }, Naming.LowerSnakeCase);
-                requestBuilder.Headers((_, headers) => headers
-                    .Add("set-of-values", new []{ "v1", "v2", "v3" }));
-            });
-    }
-}
+    client.BaseAddress = new Uri("http://api.example.com/");
+});
 ```
-## Calling your services in a CQRS-like fashion:
-To call your requests you simply need to call for `IHttpDispatcher` via Dependency Injection:
+#### - 2. Create a request by chaining it with `IHttpClientBuilder`
 ```csharp
-// example
-var dispatcher = serviceProvider.GetRequiredService<IHttpDispatcher>();
-var command = new YourCommand(/* your object*/)
-await dispatcher.Dispatch<YourCommand, YourResponse>(command, CancellationToken.None);
+
+clientBuilder.Get<SampleGet, SampleGetResponse>(r => $"users/{r.Id}/friends", // configure route 
+            reqBuilder => // configure request
+            {
+                reqBuilder.Headers((_, h) => h.Add("PER-REQUEST-HEADER", "some-value"));
+                reqBuilder.Query(q => new { Sort = "Asc", OrderBy = nameof(q.Name) });
+            });
+// translates to GET http://api.example.com/sample/1?sort=Asc&orderBy=Name
+```
+#### - 3 Use it, by injecting `IRequestDispatcher` into your services
+```csharp
+var request = new SampleGet { Id = 1, Name = "John" };
+var dispatcher = serviceProvider.GetService<IRequestDispatcher>();
+var response = await dispatcher.Dispatch<SampleGet, SampleGetResponse>(request, CancellationToken.None);
+```
+#### - 4.1. Sending JSON
+```csharp
+clientBuilder.Post<SamplePost, SamplePostResponse>("users",
+            reqBuilder => 
+            {
+                reqBuilder.Content(r => new 
+                {
+                    r.Email,
+                    r.Name,
+                    r.Password,
+                    r.PasswordConfirmation,
+                });
+            });
+```
+
+#### - 4.2. Sending files
+```csharp
+clientBuilder.Post<SampleUpload, SampleUploadResult>(r => $"users/{r.Id}/photos"
+            reqBuilder => 
+            {
+                reqBuilder.Form(r => new 
+                {
+                    Photo = r.File, // a stream, will be translated to form-data
+                    r.Description,
+                    r.IsPublic,
+                });
+            });
 ```
