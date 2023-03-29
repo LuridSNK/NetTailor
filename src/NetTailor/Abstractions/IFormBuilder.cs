@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.StaticFiles;
@@ -28,6 +29,7 @@ public class DefaultFormBuilder<TRequest> : IFormBuilder<TRequest>
         var obj = _formBuilder.Invoke(request);
         var accessors = PropertyAccessorFactory.GetPropertyAccessors(obj);
         var form = new MultipartFormDataContent();
+        Debug.WriteLine("Building form");
         foreach (var accessor in accessors)
         {
             var value = accessor.Getter(obj);
@@ -40,8 +42,9 @@ public class DefaultFormBuilder<TRequest> : IFormBuilder<TRequest>
                     continue;
                 case IConvertible convertible:
                 {
-                    var stringContent = new StringContent(convertible.ToString(CultureInfo.InvariantCulture));
-                    form.Add(stringContent, accessor.PropertyName);
+                    var stringValue = convertible.ToString(CultureInfo.InvariantCulture);
+                    Debug.WriteLine($"[{GetType()}]: Packing value: {accessor.PropertyName}:{stringValue}");
+                    form.Add(new StringContent(stringValue), accessor.PropertyName);
                     break;
                 }
             }
@@ -52,6 +55,7 @@ public class DefaultFormBuilder<TRequest> : IFormBuilder<TRequest>
 
     private void BuildForStream(MultipartFormDataContent form, FileStream fs)
     {
+        Debug.WriteLine($"[{GetType()}]: Packing file: {fs.Name}");
         var fileName = fs.Name;
         var contentType = _contentTypeProvider.TryGetContentType(fs.Name, out var type) ? type : "application/octet-stream";
         var fileContent = new StreamContent(fs);

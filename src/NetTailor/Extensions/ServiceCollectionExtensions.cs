@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
@@ -84,10 +85,11 @@ public static class HttpProfilesServiceCollectionExtensions
         });
         services.TryAddSingleton<CamelCase>();
         services.TryAddSingleton<RecyclableMemoryStreamManager>();
+        services.TryAddSingleton<IContentTypeProvider, FileExtensionContentTypeProvider>();
         services.TryAddSingleton<IRequestExecutionContextFactory, DefaultRequestExecutionContextFactory>();
         services.TryAddSingleton<IRequestDispatcher, DefaultRequestDispatcher>();
         services.TryAddSingleton<IContentWriterReaderFactory, ContentContentWriterReaderFactory>();
-        
+
         Debug.WriteLine("All required utility dependencies has been registered!");
         return services;
     }
