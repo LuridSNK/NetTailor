@@ -14,7 +14,7 @@ With .NET CLI:
 dotnet add package NetTailor
 ```
 ### Using NetTailor
-#### - 1. Create your profile (or see an [example](https://github.com/LuridSNK/NetTailor/blob/master/src/Examples/NetTailor.Example/ExampleClientProfile.cs))
+#### 1. Create your profile (or see an [example](https://github.com/LuridSNK/NetTailor/blob/master/src/Examples/NetTailor.Example/ExampleClientProfile.cs))
 ```csharp
 // use against IServiceCollection
 var clientBuilder = services.AddHttpClientProfile("example", client =>
@@ -22,7 +22,7 @@ var clientBuilder = services.AddHttpClientProfile("example", client =>
     client.BaseAddress = new Uri("http://api.example.com/");
 });
 ```
-#### - 2. Create a request by chaining it with `IHttpClientBuilder`
+#### 2. Create a request by chaining it with `IHttpClientBuilder`
 ```csharp
 
 clientBuilder.Get<SampleGet, SampleGetResponse>(r => $"users/{r.Id}/friends", // configure route 
@@ -39,7 +39,7 @@ var request = new SampleGet { Id = 1, Name = "John" };
 var dispatcher = serviceProvider.GetService<IRequestDispatcher>();
 var response = await dispatcher.Dispatch<SampleGet, SampleGetResponse>(request, CancellationToken.None);
 ```
-#### - 4.1. Sending JSON
+#### 4.1. Sending JSON
 ```csharp
 clientBuilder.Post<SamplePost, SamplePostResponse>("users",
             reqBuilder => 
@@ -54,7 +54,7 @@ clientBuilder.Post<SamplePost, SamplePostResponse>("users",
             });
 ```
 
-#### - 4.2. Sending files
+#### 4.2. Sending files
 ```csharp
 clientBuilder.Post<SampleUpload, SampleUploadResult>(r => $"users/{r.Id}/photos"
             reqBuilder => 
