@@ -2,7 +2,7 @@
 ### Weave your network like a master craftsman.
 A library for fluent HttpClient configuration and CQRS-like usage.
 
-![CI](https://github.com/LuridSnk/NetTailor/workflows/CI/badge.svg)
+![CI](https://github.com/LuridSNK/NetTailor/workflows/CI/badge.svg)
 [![NuGet](https://img.shields.io/nuget/dt/nettailor.svg)](https://www.nuget.org/packages/nettailor)
 [![NuGet](https://img.shields.io/nuget/vpre/nettailor.svg)](https://www.nuget.org/packages/nettailor)
 

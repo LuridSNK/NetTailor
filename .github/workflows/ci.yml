@@ -1,4 +1,4 @@
-name: Publish NuGet package
+name: CI
 
 on:
   push:
