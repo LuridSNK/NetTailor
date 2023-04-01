@@ -86,7 +86,7 @@ public static class HttpProfilesServiceCollectionExtensions
         services.TryAddSingleton<CamelCase>();
         services.TryAddSingleton<RecyclableMemoryStreamManager>();
         services.TryAddSingleton<IContentTypeProvider, FileExtensionContentTypeProvider>();
-        services.TryAddSingleton<IRequestExecutionContextFactory, DefaultRequestExecutionContextFactory>();
+        services.TryAddSingleton<IRequestExecutionContextFactory, RequestExecutionContextFactory>();
         services.TryAddSingleton<IRequestDispatcher, DefaultRequestDispatcher>();
         services.TryAddSingleton<IContentWriterReaderFactory, ContentContentWriterReaderFactory>();
 

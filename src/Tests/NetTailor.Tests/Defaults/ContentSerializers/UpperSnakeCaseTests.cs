@@ -9,8 +9,7 @@ namespace NetTailor.Tests.Defaults.ContentSerializers;
 public class UpperSnakeCaseTests
 {
     private static readonly RecyclableMemoryStreamManager MemoryStreamManager = new();
-    private static readonly IContentTypeProvider ContentTypeProvider = new FileExtensionContentTypeProvider();
-    private static UpperSnakeCase UpperSnakeCaseReadWriter => new(MemoryStreamManager, ContentTypeProvider);
+    private static UpperSnakeCase UpperSnakeCaseReadWriter => new(MemoryStreamManager);
 
     [Theory]
     [InlineData("SomeValue", 1, true, new[] { 1 })]

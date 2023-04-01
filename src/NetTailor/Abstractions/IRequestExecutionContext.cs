@@ -5,7 +5,7 @@
 /// </summary>
 /// <typeparam name="TRequest">A request object which is used for sending to an api</typeparam>
 /// <typeparam name="TResponse">A response object which is being returned from an api</typeparam>
-public interface IRequestExecutionContext<in TRequest, TResponse>
+public interface IRequestExecutionContext<TRequest, TResponse>
 {
     /// <summary>
     /// <see cref="HttpClient"/> of request
@@ -38,6 +38,11 @@ public interface IRequestExecutionContext<in TRequest, TResponse>
     /// A <see cref="IRequestBodyShaper{TRequest}"/> of the request
     /// </summary>
     public IRequestBodyShaper<TRequest> BodyShaper { get;  }
+    
+    /// <summary>
+    /// A <see cref="IFormBuilder{TRequest}"/> of the request
+    /// </summary>
+    public IFormBuilder<TRequest> FormBuilder { get; }
 
     /// <summary>
     /// A <see cref="IRequestBodyShaper{TRequest}"/> of the while service

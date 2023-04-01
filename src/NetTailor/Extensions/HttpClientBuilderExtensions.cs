@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Linq.Expressions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NetTailor.Abstractions;
 using NetTailor.Defaults;
 
@@ -23,7 +24,7 @@ public static class HttpClientBuilderExtensions
         this IHttpClientBuilder builder, 
         Expression<Func<TRequest, string>> configureRoute,
         Action<IHttpRequestBuilder<TRequest, TResponse>>? configureRequest = default)
-        where TRequest : IRequest<TResponse>
+        where TRequest : IHttpRequest<TResponse>
     {
         CheckArgumentsAndThrowIfAnyIsNull(builder, configureRoute);
         
@@ -45,7 +46,7 @@ public static class HttpClientBuilderExtensions
         this IHttpClientBuilder builder,
         string route,
         Action<IHttpRequestBuilder<TRequest, TResponse>>? configureRequest = default)
-        where TRequest : IRequest<TResponse> 
+        where TRequest : IHttpRequest<TResponse> 
         => builder.Head(_ => route, configureRequest);
     
     /// <summary>
@@ -60,7 +61,7 @@ public static class HttpClientBuilderExtensions
         this IHttpClientBuilder builder, 
         Expression<Func<TRequest, string>> configureRoute,
         Action<IHttpRequestBuilder<TRequest, TResponse>>? configureRequest = default)
-        where TRequest : IRequest<TResponse>
+        where TRequest : IHttpRequest<TResponse>
     {
         CheckArgumentsAndThrowIfAnyIsNull(builder, configureRoute);
         
@@ -83,7 +84,7 @@ public static class HttpClientBuilderExtensions
         this IHttpClientBuilder builder,
         string route,
         Action<IHttpRequestBuilder<TRequest, TResponse>>? configureRequest = default)
-        where TRequest : IRequest<TResponse> 
+        where TRequest : IHttpRequest<TResponse> 
         => builder.Get(_ => route, configureRequest);
 
     /// <summary>
@@ -98,7 +99,7 @@ public static class HttpClientBuilderExtensions
         this IHttpClientBuilder builder,
         Expression<Func<TRequest, string>> configureRoute,
         Action<IHttpRequestBuilder<TRequest, TResponse>>? configureRequest = default)
-        where TRequest : IRequest<TResponse>
+        where TRequest : IHttpRequest<TResponse>
     {
         CheckArgumentsAndThrowIfAnyIsNull(builder, configureRoute);
         
@@ -121,7 +122,7 @@ public static class HttpClientBuilderExtensions
         this IHttpClientBuilder builder,
         string route,
         Action<IHttpRequestBuilder<TRequest, TResponse>>? configureRequest = default)
-        where TRequest : IRequest<TResponse>
+        where TRequest : IHttpRequest<TResponse>
         => builder.Post(_ => route, configureRequest);
     
     
@@ -137,7 +138,7 @@ public static class HttpClientBuilderExtensions
         this IHttpClientBuilder builder,
         Expression<Func<TRequest, string>> configureRoute,
         Action<IHttpRequestBuilder<TRequest, TResponse>>? configureRequest = default)
-        where TRequest : IRequest<TResponse>
+        where TRequest : IHttpRequest<TResponse>
     {
         CheckArgumentsAndThrowIfAnyIsNull(builder, configureRoute);
         
@@ -160,7 +161,7 @@ public static class HttpClientBuilderExtensions
         this IHttpClientBuilder builder,
         string route,
         Action<IHttpRequestBuilder<TRequest, TResponse>>? configureRequest = default)
-        where TRequest : IRequest<TResponse>
+        where TRequest : IHttpRequest<TResponse>
         => builder.Put(_ => route, configureRequest);
     
     
@@ -176,7 +177,7 @@ public static class HttpClientBuilderExtensions
         this IHttpClientBuilder builder,
         Expression<Func<TRequest, string>> configureRoute,
         Action<IHttpRequestBuilder<TRequest, TResponse>>? configureRequest = default)
-        where TRequest : IRequest<TResponse>
+        where TRequest : IHttpRequest<TResponse>
     {
         CheckArgumentsAndThrowIfAnyIsNull(builder, configureRoute);
         
@@ -199,7 +200,7 @@ public static class HttpClientBuilderExtensions
         this IHttpClientBuilder builder,
         string route,
         Action<IHttpRequestBuilder<TRequest, TResponse>>? configureRequest = default)
-        where TRequest : IRequest<TResponse>
+        where TRequest : IHttpRequest<TResponse>
         => builder.Patch(_ => route, configureRequest);
     
     
@@ -215,7 +216,7 @@ public static class HttpClientBuilderExtensions
         this IHttpClientBuilder builder,
         Expression<Func<TRequest, string>> configureRoute,
         Action<IHttpRequestBuilder<TRequest, TResponse>>? configureRequest = default)
-        where TRequest : IRequest<TResponse>
+        where TRequest : IHttpRequest<TResponse>
     {
         CheckArgumentsAndThrowIfAnyIsNull(builder, configureRoute);
         
@@ -239,7 +240,7 @@ public static class HttpClientBuilderExtensions
         this IHttpClientBuilder builder,
         string route,
         Action<IHttpRequestBuilder<TRequest, TResponse>>? configureRequest = default)
-        where TRequest : IRequest<TResponse>
+        where TRequest : IHttpRequest<TResponse>
         => builder.Delete(_ => route, configureRequest);
     
     private static void ConfigureMethodAndEndpointFor<TRequest, TResponse>(

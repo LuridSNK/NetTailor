@@ -11,5 +11,5 @@ public interface IRequestExecutionContextFactory
     /// <typeparam name="TRequest">A request of the execution context</typeparam>
     /// <typeparam name="TResponse">A response of the execution context</typeparam>
     /// <returns>An instance of <see cref="IRequestExecutionContext{TRequest,TResponse}"/></returns>
-    IRequestExecutionContext<TRequest, TResponse>? Create<TRequest, TResponse>();
+    public IRequestExecutionContext<TRequest, TResponse>? Create<TRequest, TResponse>();
 }

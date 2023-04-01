@@ -6,9 +6,9 @@ namespace NetTailor.Defaults.ContentSerializers;
 internal class ContentContentWriterReaderFactory : IContentWriterReaderFactory
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly IOptionsMonitor<ContentSerializerOptions> _optionsMonitor;
+    private readonly IOptionsMonitor<ContentReaderWriterOptions> _optionsMonitor;
 
-    public ContentContentWriterReaderFactory(IServiceProvider serviceProvider, IOptionsMonitor<ContentSerializerOptions> options)
+    public ContentContentWriterReaderFactory(IServiceProvider serviceProvider, IOptionsMonitor<ContentReaderWriterOptions> options)
     {
         _optionsMonitor = options;
         _serviceProvider = serviceProvider;

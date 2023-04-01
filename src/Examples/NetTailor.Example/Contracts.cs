@@ -2,18 +2,18 @@
 
 namespace NetTailor.Example.Contracts;
 
-public record SampleGet(string Id) : IRequest<SampleGetResponse>;
-public record SampleGetResponse(string[] Values) : IRequest<SampleGetResponse>;
+public record SampleGet(string Id) : IHttpRequest<SampleGetResponse>;
+public record SampleGetResponse(string[] Values) : IHttpRequest<SampleGetResponse>;
 
 
 
-public record SamplePost(string[] Items) : IRequest<SamplePostResponse>;
+public record SamplePost(string[] Items) : IHttpRequest<SamplePostResponse>;
 
 public record SamplePostResponse(string Result);
 
-public record SampleDelete(string Id) : IRequest<Empty>;
+public record SampleDelete(string Id) : IHttpRequest<Empty>;
 
-public record SampleFileUpload(Stream Content) : IRequest<SampleFileUploadResponse>;
+public record SampleFileUpload(Stream Content) : IHttpRequest<SampleFileUploadResponse>;
 public record SampleFileUploadResponse(string CreatedId);
 
-public record SampleFileDownload(string Id) : IRequest<Stream>;
+public record SampleFileDownload(string Id) : IHttpRequest<Stream>;
