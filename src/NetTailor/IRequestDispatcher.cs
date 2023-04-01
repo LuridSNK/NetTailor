@@ -13,7 +13,7 @@ public interface IRequestDispatcher
     /// <typeparam name="TResponse"></typeparam>
     /// <returns></returns>
     public Task<HttpResult<TResponse?>> Dispatch<TRequest, TResponse>(TRequest request, CancellationToken ct = default)
-        where TRequest : IRequest<TResponse>
+        where TRequest : IHttpRequest<TResponse>
         where TResponse : class;
 
     /// <summary>
@@ -24,5 +24,5 @@ public interface IRequestDispatcher
     /// <typeparam name="TRequest"></typeparam>
     /// <returns></returns>
     public Task<HttpResult<Empty>> Dispatch<TRequest>(TRequest request, CancellationToken ct = default)
-        where TRequest : IRequest<Empty>;
+        where TRequest : IHttpRequest<Empty>;
 }

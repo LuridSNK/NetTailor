@@ -9,6 +9,7 @@ public record DefaultRequestExecutionContext<TRequest, TResponse>(
     IQueryStringBuilder<TRequest> QueryBuilder, 
     IHeaderProvider<TRequest> HeaderProvider, 
     IRequestBodyShaper<TRequest> BodyShaper, 
+    IFormBuilder<TRequest> FormBuilder,
     IContentReader ContentReader, 
     IContentWriter ContentWriter) : IRequestExecutionContext<TRequest, TResponse>
 {
@@ -18,6 +19,8 @@ public record DefaultRequestExecutionContext<TRequest, TResponse>(
     public IQueryStringBuilder<TRequest> QueryBuilder { get; } = QueryBuilder;
     public IHeaderProvider<TRequest> HeaderProvider { get; } = HeaderProvider;
     public IRequestBodyShaper<TRequest> BodyShaper { get; } = BodyShaper;
+    
+    public IFormBuilder<TRequest> FormBuilder { get; } = FormBuilder;
     public IContentReader ContentReader { get; } = ContentReader;
     public IContentWriter ContentWriter { get; } = ContentWriter;
 }

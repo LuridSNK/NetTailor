@@ -3,7 +3,7 @@ using NetTailor.Abstractions;
 
 namespace NetTailor.Defaults.ContentSerializers;
 
-public class ContentSerializerOptions
+public class ContentReaderWriterOptions
 {
     public Func<IServiceProvider, IContentReader> ContentReader { get; internal set; } = 
         sp => sp.GetRequiredService<CamelCase>();

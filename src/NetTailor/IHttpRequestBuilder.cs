@@ -18,7 +18,7 @@ public interface IHttpRequestBuilder<TRequest, TResponse>
     internal IServiceCollection Services { get; }
     
     /// <summary>
-    /// Configures the request body based on a request object.
+    /// Configures request to transform it to <see cref="HttpContent"/> as plain text, json or xml.
     /// </summary>
     /// <param name="configureContent">A delegate that is used to configure an object for <see cref="HttpContent"/></param>
     public IHttpRequestBuilder<TRequest, TResponse> Content(Expression<Func<TRequest, object>> configureContent);
@@ -39,6 +39,14 @@ public interface IHttpRequestBuilder<TRequest, TResponse>
     /// A delegate that is used to configure an object for <see cref="HttpRequestHeaders"/>
     /// </param>
     public IHttpRequestBuilder<TRequest, TResponse> Headers(Action<TRequest, HttpRequestHeaders> configureHeaders);
+    
+    /// <summary>
+    /// Configures request to transform it to <see cref="HttpContent"/> as multipart-form-data object.
+    /// </summary>
+    /// <param name="configureHeaders">
+    /// A delegate that is used to configure an object for <see cref="HttpRequestHeaders"/>
+    /// </param>
+    public IHttpRequestBuilder<TRequest, TResponse> Form(Expression<Func<TRequest, object>> configureHeaders);
 
 
     /// <summary>

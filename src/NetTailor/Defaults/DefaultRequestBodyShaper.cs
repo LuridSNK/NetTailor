@@ -15,15 +15,3 @@ internal class DefaultRequestBodyShaper<TRequest> : IRequestBodyShaper<TRequest>
 
     public object? Shape(TRequest request) => _shapeBody.Invoke(request);
 }
-
-internal class StreamRequestBodyShaper<TRequest> : IRequestBodyShaper<TRequest>
-{
-    private readonly Func<TRequest, Stream> _shapeBody;
-
-    public StreamRequestBodyShaper(Expression<Func<TRequest, Stream>> shapeBody)
-    {
-        _shapeBody = shapeBody.CompileFast();
-    }
-
-    public object? Shape(TRequest request) => _shapeBody.Invoke(request);
-}

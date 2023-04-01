@@ -10,8 +10,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetTailor.Tests", "Tests\Ne
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetTailor.Example", "Examples\NetTailor.Example\NetTailor.Example.csproj", "{BB923C58-F55E-4013-884A-0D1911F39C5A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Benchmarks", "Benchmarks", "{69AABDE2-C86A-44C4-A4E8-883B093FCAD6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetTailor.ExampleApi", "Examples\NetTailor.ExampleApi\NetTailor.ExampleApi.csproj", "{F418D07A-B9C6-4332-9716-5DE65E2AC19D}"
 EndProject
 Global

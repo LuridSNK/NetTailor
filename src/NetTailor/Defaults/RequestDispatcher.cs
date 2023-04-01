@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using NetTailor.Abstractions;
 using NetTailor.Contracts;
 
@@ -8,48 +9,56 @@ namespace NetTailor.Defaults;
 public class DefaultRequestDispatcher : IRequestDispatcher
 {
     private readonly IRequestExecutionContextFactory _contextFactory;
+    private readonly ILogger<DefaultRequestDispatcher> _logger;
 
-    public DefaultRequestDispatcher(IRequestExecutionContextFactory contextFactory)
+    public DefaultRequestDispatcher(IRequestExecutionContextFactory contextFactory, ILogger<DefaultRequestDispatcher> logger)
     {
         _contextFactory = contextFactory;
+        _logger = logger;
     }
     
     public async Task<HttpResult<TResponse?>> Dispatch<TRequest, TResponse>(TRequest request, CancellationToken ct = default) 
-        where TRequest : IRequest<TResponse>
+        where TRequest : IHttpRequest<TResponse>
         where TResponse : class 
     {
         if (request == null) return HttpResults.Failure<TResponse>(new ArgumentNullException(nameof(request)));
         
         var ctx = _contextFactory.Create<TRequest, TResponse>();
         
-        if (ctx is null) return HttpResults.Failure<TResponse>(new ArgumentNullException(nameof(ctx)));
-
+        if (ctx is null) return HttpResults.Failure<TResponse>(new NullReferenceException(nameof(ctx)));
         var uri = await BuildUri(ctx, request, ct);
         var message = ctx.BodyShaper.Shape(request);
-        var content = await ctx.ContentWriter.Write(message, ct);
+        var content = await ctx.ContentWriter.Write(message, ct) ?? await ctx.FormBuilder.Build(request);
         var httpRequest = new HttpRequestMessage(ctx.Method, uri)
         {
             Content = content
         };
         
         await ctx.HeaderProvider.Provide(request, httpRequest.Headers, ct);
-        
-        Debug.WriteLine(httpRequest);
-        
+#if DEBUG
+        _logger.LogDebug("Message sent: {Message}", httpRequest);
+#endif
         var httpResponse = await ctx.Client.SendAsync(httpRequest, ct);
         if (!httpResponse.IsSuccessStatusCode)
         {
-            var httpMessage = $"API responded {httpResponse.StatusCode:D} with reason phrase {httpResponse.ReasonPhrase} while processing request {typeof(TRequest)}";
+            _logger.LogWarning(
+                "Remote resource {Api} responded with {Code}:{ReasonPhrase} while processing request {Request}", 
+                httpResponse.RequestMessage?.RequestUri, 
+                httpResponse.StatusCode, 
+                httpResponse.ReasonPhrase, 
+                typeof(TRequest));
+            var httpMessage = $"Remote resource responded {httpResponse.StatusCode:D} with reason phrase {httpResponse.ReasonPhrase} while processing request {typeof(TRequest)}";
             var ex = new HttpRequestException(httpMessage);
             return HttpResults.Failure<TResponse>(ex);
         }
-        
-        Debug.WriteLine(httpResponse);
-        
+#if DEBUG
+        _logger.LogDebug("Message received: {Message}", httpResponse);
+#endif
         var value = await ctx.ContentReader.Read<TResponse>(httpResponse.Content!, ct);
         
         if (value is null)
         {
+            _logger.LogWarning("Could not deserialize type {Type} from response {Response}", typeof(TResponse), httpResponse);
             var jsonMessage = $"Could not deserialize {typeof(TResponse)}. Yes, message of type {typeof(TRequest)} resulted in {httpResponse.StatusCode:D} status code.";
             var ex = new JsonException(jsonMessage);
             return HttpResults.Failure<TResponse>(ex);
@@ -59,32 +68,41 @@ public class DefaultRequestDispatcher : IRequestDispatcher
     }
 
     public async Task<HttpResult<Empty>> Dispatch<TRequest>(TRequest request, CancellationToken ct = default) 
-        where TRequest : IRequest<Empty>
+        where TRequest : IHttpRequest<Empty>
     {
         if (request == null) return HttpResults.Failure(new ArgumentNullException(nameof(request)));
         
         var ctx = _contextFactory.Create<TRequest, Empty>();
         
         if (ctx is null) return HttpResults.Failure(new ArgumentNullException(nameof(ctx)));
-
         var uri = await BuildUri(ctx, request, ct);
-        var message = new HttpRequestMessage(ctx.Method, uri)
+        var message = ctx.BodyShaper.Shape(request);
+        var content = await ctx.ContentWriter.Write(message, ct) ?? await ctx.FormBuilder.Build(request);
+        var httpRequest = new HttpRequestMessage(ctx.Method, uri)
         {
-            Content = await ctx.ContentWriter.Write(request, ct)
+            Content = content
         };
         
-        await ctx.HeaderProvider.Provide(request, message.Headers, ct);
-        
-        Debug.WriteLine(message);
-        Debug.WriteLineIf(message.Content is not null, message.Content!.ReadAsStringAsync());
-        
-        var httpResponse = await ctx.Client.SendAsync(message, ct);
+        await ctx.HeaderProvider.Provide(request, httpRequest.Headers, ct);
+#if DEBUG
+        _logger.LogDebug("Message sent: {Message}", httpRequest);
+#endif
+        var httpResponse = await ctx.Client.SendAsync(httpRequest, ct);
         if (!httpResponse.IsSuccessStatusCode)
         {
-            var httpMessage = $"API responded {httpResponse.StatusCode:D} with reason phrase {httpResponse.ReasonPhrase} while processing request {typeof(TRequest)}";
+            _logger.LogWarning(
+                "Remote resource {Api} responded with {Code}:{ReasonPhrase} while processing request {Request}", 
+                httpResponse.RequestMessage?.RequestUri, 
+                httpResponse.StatusCode, 
+                httpResponse.ReasonPhrase, 
+                typeof(TRequest));
+            var httpMessage = $"Remote resource responded {httpResponse.StatusCode:D} with reason phrase {httpResponse.ReasonPhrase} while processing request {typeof(TRequest)}";
             var ex = new HttpRequestException(httpMessage);
             return HttpResults.Failure(ex);
         }
+#if DEBUG
+        _logger.LogDebug("Message received: {Message}", httpResponse);
+#endif
         
         return HttpResults.Success(Empty.Value);
     }

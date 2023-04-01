@@ -67,7 +67,7 @@ internal sealed class DefaultHttpRequestBuilder<TRequest, TResponse> : IHttpRequ
     {
         Debug.WriteLine(nameof(TRequest));
         Services.TryAddSingleton<TContentReader>();
-        Services.Configure<ContentSerializerOptions>(nameof(TRequest), options =>
+        Services.Configure<ContentReaderWriterOptions>(nameof(TRequest), options =>
         {
             options.ContentReader = provider => provider.GetRequiredService<TContentReader>();
         });
@@ -80,7 +80,7 @@ internal sealed class DefaultHttpRequestBuilder<TRequest, TResponse> : IHttpRequ
     {
         Debug.WriteLine(nameof(TRequest));
         Services.TryAddSingleton<TContentWriter>();
-        Services.Configure<ContentSerializerOptions>(nameof(TRequest), options =>
+        Services.Configure<ContentReaderWriterOptions>(nameof(TRequest), options =>
         {
             options.ContentWriter = provider => provider.GetRequiredService<TContentWriter>();
         });
