@@ -33,6 +33,7 @@ public class RequestExecutionContextFactory : IRequestExecutionContextFactory
         var clientNameGetter = _serviceProvider.GetRequiredService<IClientNameGetter<TRequest>>();
         var requestNameGetter = _serviceProvider.GetRequiredService<IRequestNameGetter<TRequest>>();
         logger.LogDebug("Client: {ClientName}, Request: {RequestName}", clientNameGetter.Name, requestNameGetter.Name);
+        
         if (RequestExecutionContextCache<TRequest, TResponse>.Cache
             .TryGetValue(requestNameGetter.Name, out var cachedCtx))
         {
@@ -58,7 +59,7 @@ public class RequestExecutionContextFactory : IRequestExecutionContextFactory
         var writer = _contentWriterReaderFactory.CreateWriter(requestNameGetter.Name);
 
         var executionCtx = new DefaultRequestExecutionContext<TRequest, TResponse>(
-            Client: _clientFactory.CreateClient(clientNameGetter.Name),
+            ClientName: clientNameGetter.Name,
             Method: methodNameGetter.Method,
             EndpointBuilder: endpointBuilder,
             QueryBuilder: queryBuilder,
@@ -74,7 +75,7 @@ public class RequestExecutionContextFactory : IRequestExecutionContextFactory
         return executionCtx;
     }
 
-    private static class RequestExecutionContextCache<TRequest, TResponse>
+    internal static class RequestExecutionContextCache<TRequest, TResponse>
     {
         public static readonly IDictionary<string, IRequestExecutionContext<TRequest, TResponse>> Cache =
             new ConcurrentDictionary<string, IRequestExecutionContext<TRequest, TResponse>>();

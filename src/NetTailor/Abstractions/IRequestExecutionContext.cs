@@ -10,7 +10,7 @@ public interface IRequestExecutionContext<TRequest, TResponse>
     /// <summary>
     /// <see cref="HttpClient"/> of request
     /// </summary>
-    public HttpClient Client { get; }
+    public string ClientName { get; }
     
     //public string HttpClientName { get; internal set; }
     

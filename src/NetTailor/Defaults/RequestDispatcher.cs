@@ -9,11 +9,16 @@ namespace NetTailor.Defaults;
 public class DefaultRequestDispatcher : IRequestDispatcher
 {
     private readonly IRequestExecutionContextFactory _contextFactory;
+    private readonly IHttpClientFactory _clientFactory;
     private readonly ILogger<DefaultRequestDispatcher> _logger;
 
-    public DefaultRequestDispatcher(IRequestExecutionContextFactory contextFactory, ILogger<DefaultRequestDispatcher> logger)
+    public DefaultRequestDispatcher(
+        IRequestExecutionContextFactory contextFactory, 
+        IHttpClientFactory clientFactory, 
+        ILogger<DefaultRequestDispatcher> logger)
     {
         _contextFactory = contextFactory;
+        _clientFactory = clientFactory;
         _logger = logger;
     }
     
@@ -29,7 +34,7 @@ public class DefaultRequestDispatcher : IRequestDispatcher
         var uri = await BuildUri(ctx, request, ct);
         var message = ctx.BodyShaper.Shape(request);
         var content = await ctx.ContentWriter.Write(message, ct) ?? await ctx.FormBuilder.Build(request);
-        var httpRequest = new HttpRequestMessage(ctx.Method, uri)
+        var httpRequest = new HttpRequestMessage(ctx.Method, new Uri(uri, UriKind.Relative))
         {
             Content = content
         };
@@ -38,7 +43,8 @@ public class DefaultRequestDispatcher : IRequestDispatcher
 #if DEBUG
         _logger.LogDebug("Message sent: {Message}", httpRequest);
 #endif
-        var httpResponse = await ctx.Client.SendAsync(httpRequest, ct);
+        var client = _clientFactory.CreateClient(ctx.ClientName);
+        var httpResponse = await client.SendAsync(httpRequest, ct);
         if (!httpResponse.IsSuccessStatusCode)
         {
             _logger.LogWarning(
@@ -78,7 +84,7 @@ public class DefaultRequestDispatcher : IRequestDispatcher
         var uri = await BuildUri(ctx, request, ct);
         var message = ctx.BodyShaper.Shape(request);
         var content = await ctx.ContentWriter.Write(message, ct) ?? await ctx.FormBuilder.Build(request);
-        var httpRequest = new HttpRequestMessage(ctx.Method, uri)
+        var httpRequest = new HttpRequestMessage(ctx.Method, new Uri(uri, UriKind.Relative))
         {
             Content = content
         };
@@ -87,7 +93,8 @@ public class DefaultRequestDispatcher : IRequestDispatcher
 #if DEBUG
         _logger.LogDebug("Message sent: {Message}", httpRequest);
 #endif
-        var httpResponse = await ctx.Client.SendAsync(httpRequest, ct);
+        var client = _clientFactory.CreateClient(ctx.ClientName);
+        var httpResponse = await client.SendAsync(httpRequest, ct);
         if (!httpResponse.IsSuccessStatusCode)
         {
             _logger.LogWarning(
