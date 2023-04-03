@@ -3,7 +3,7 @@
 namespace NetTailor.Defaults;
 
 public record DefaultRequestExecutionContext<TRequest, TResponse>(
-    HttpClient Client, 
+    string ClientName, 
     HttpMethod Method, 
     IEndpointBuilder<TRequest> EndpointBuilder, 
     IQueryStringBuilder<TRequest> QueryBuilder, 
@@ -13,7 +13,7 @@ public record DefaultRequestExecutionContext<TRequest, TResponse>(
     IContentReader ContentReader, 
     IContentWriter ContentWriter) : IRequestExecutionContext<TRequest, TResponse>
 {
-    public HttpClient Client { get; } = Client;
+    public string ClientName { get; } = ClientName;
     public HttpMethod Method { get; } = Method;
     public IEndpointBuilder<TRequest> EndpointBuilder { get; } = EndpointBuilder;
     public IQueryStringBuilder<TRequest> QueryBuilder { get; } = QueryBuilder;

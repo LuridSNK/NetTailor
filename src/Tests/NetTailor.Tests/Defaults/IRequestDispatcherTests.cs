@@ -13,8 +13,6 @@ using NSubstitute;
 
 namespace NetTailor.Tests.Defaults;
 
-public record PostRequest(int Id) : IHttpRequest<Empty>;
-
 public class IRequestDispatcherTests
 {
     private static readonly RecyclableMemoryStreamManager MemoryStreamManager = new();
@@ -26,10 +24,7 @@ public class IRequestDispatcherTests
     public async Task Dispatcher_ForGivenContext_ShouldDispatchRequestCorrectly()
     {
         IRequestExecutionContext<PostRequest, Empty> context = new DefaultRequestExecutionContext<PostRequest, Empty>(
-            Client: new HttpClient(new MockApi(_ => HttpStatusCode.NoContent))
-            {
-                BaseAddress = new Uri("https://api.example.com/")
-            },
+            ClientName: "ExampleProfile",
             Method: HttpMethod.Post,
             EndpointBuilder: new DefaultEndpointBuilder<PostRequest>(r => $"/things/{r.Id}"),
             QueryBuilder: new NoOpQueryStringBuilder<PostRequest>(),
@@ -40,11 +35,16 @@ public class IRequestDispatcherTests
             ContentWriter: _camelCase
         );
         
-        var factory = Substitute.For<IRequestExecutionContextFactory>();
-        factory.Create<PostRequest, Empty>().Returns(_ => context);
+        var contextFactory = Substitute.For<IRequestExecutionContextFactory>();
+        contextFactory.Create<PostRequest, Empty>().Returns(_ => context);
+        var clientFactory = Substitute.For<IHttpClientFactory>();
+        clientFactory.CreateClient("ExampleProfile").Returns(_ => new HttpClient(new MockApi(_ => HttpStatusCode.NoContent))
+        {
+            BaseAddress = new Uri("https://api.example.com")
+        });
         
         var logger = new NullLogger<DefaultRequestDispatcher>();
-        IRequestDispatcher dispatcher = new DefaultRequestDispatcher(factory, logger);
+        IRequestDispatcher dispatcher = new DefaultRequestDispatcher(contextFactory, clientFactory, logger);
         var request = new PostRequest(69);
         var response = await dispatcher.Dispatch(request);
         response.Successful.Should().BeTrue();
@@ -65,14 +65,15 @@ public class IRequestDispatcherTests
         var response = await dispatcher.Dispatch(request);
         response.Successful.Should().BeTrue();
     }
-    
+    public record PostRequest(int Id) : IHttpRequest<Empty>;
     [Fact]
     public async Task Dispatcher_ForGivenContext_ShouldDispatchRequest_WithBody()
     {
+        RequestExecutionContextFactory.RequestExecutionContextCache<PostRequest, Empty>.Cache.Clear();
         var services = new ServiceCollection();
         services.AddHttpClientProfile("TestProfile",
                 client => client.BaseAddress = new Uri("https://api.example.com"))
-            .Post<PostRequest, Empty>(r => $"/things/{r.Id}",
+            .Post<PostRequest, Empty>(r => $"things/{r.Id}",
                 rb =>
                 {
                     rb.Content(r => new { Body = "Content" });
@@ -98,6 +99,7 @@ public class IRequestDispatcherTests
     [Fact]
     public async Task Dispatcher_ForGivenContext_ShouldDispatchRequest_WithMultipart()
     {
+        RequestExecutionContextFactory.RequestExecutionContextCache<PostRequest, Empty>.Cache.Clear();
         var services = new ServiceCollection();
         services.AddHttpClientProfile("TestProfile",
                 client => client.BaseAddress = new Uri("https://api.example.com"))
