@@ -54,7 +54,11 @@ public class DefaultRequestDispatcher : IRequestDispatcher
                 httpResponse.ReasonPhrase, 
                 typeof(TRequest));
             var httpMessage = $"Remote resource responded {httpResponse.StatusCode:D} with reason phrase {httpResponse.ReasonPhrase} while processing request {typeof(TRequest)}";
+#if ASPNETCORE
+            var ex = new HttpRequestException(httpMessage, statusCode: httpResponse.StatusCode);
+#else
             var ex = new HttpRequestException(httpMessage);
+#endif
             return HttpResults.Failure<TResponse>(ex);
         }
 #if DEBUG
@@ -104,7 +108,11 @@ public class DefaultRequestDispatcher : IRequestDispatcher
                 httpResponse.ReasonPhrase, 
                 typeof(TRequest));
             var httpMessage = $"Remote resource responded {httpResponse.StatusCode:D} with reason phrase {httpResponse.ReasonPhrase} while processing request {typeof(TRequest)}";
+#if ASPNETCORE
+            var ex = new HttpRequestException(httpMessage, statusCode: httpResponse.StatusCode);
+#else
             var ex = new HttpRequestException(httpMessage);
+#endif
             return HttpResults.Failure(ex);
         }
 #if DEBUG
