@@ -19,7 +19,7 @@ jobs:
         dotnet-version: '7.0.202'
 
     - name: Restore dependencies
-      run: dotnet restore .src/NetTailor.sln
+      run: dotnet restore .src/
 
     - name: Build and test
       run: dotnet test ./src/Tests/NetTailor.Tests/NetTailor.Tests.csproj && dotnet build -c Release --no-restore
