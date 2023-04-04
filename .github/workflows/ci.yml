@@ -24,7 +24,7 @@ jobs:
       run: dotnet test ./src/Tests/NetTailor.Tests/NetTailor.Tests.csproj && dotnet build ./src/NetTailor/NetTailor.csproj -c Release
 
     - name: Pack NuGet package
-      run: dotnet pack ./src/NetTailor/NetTailor.csproj -c Release -o --no-build
+      run: dotnet pack ./src/NetTailor/NetTailor.csproj -c Release --no-build
 
     - name: Publish NuGet package
       run: dotnet nuget push **/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
