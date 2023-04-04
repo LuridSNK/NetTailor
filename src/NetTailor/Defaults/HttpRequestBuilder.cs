@@ -33,7 +33,7 @@ internal sealed class DefaultHttpRequestBuilder<TRequest, TResponse> : IHttpRequ
         return this;
     }
 
-    public IHttpRequestBuilder<TRequest, TResponse> Query(Expression<Func<TRequest, object>> configureQuery, Naming? naming = default)
+    public IHttpRequestBuilder<TRequest, TResponse> Query(Expression<Func<TRequest, object>> configureQuery, Naming? naming = Naming.CamelCase)
     {
         if (configureQuery == null) throw new ArgumentNullException(nameof(configureQuery));
 #if DEBUG
