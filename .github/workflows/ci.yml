@@ -20,8 +20,11 @@ jobs:
       with:
         dotnet-version: '7.0.x'
 
-    - name: Test & Build
-      run: dotnet test ./src/Tests/NetTailor.Tests/NetTailor.Tests.csproj && dotnet build ./src/NetTailor/NetTailor.csproj -c Release
+    - name: Test
+      run: dotnet test ./src/Tests/NetTailor.Tests/NetTailor.Tests.csproj
+      
+    - name: Build
+      run: dotnet build ./src/NetTailor/NetTailor.csproj -c Release
 
     - name: Pack NuGet package
       run: dotnet pack .src/NetTailor/NetTailor.csproj -c Release -o --include-symbols --include-source --no-build /p:PackageVersion=$(VersionTag)
