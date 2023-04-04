@@ -27,7 +27,7 @@ jobs:
       run: dotnet build ./src/NetTailor/NetTailor.csproj -c Release
 
     - name: Pack NuGet package
-      run: dotnet pack .src/NetTailor/NetTailor.csproj -c Release -o --include-symbols --include-source --no-build /p:PackageVersion=$(VersionTag)
+      run: dotnet pack ./src/NetTailor/NetTailor.csproj -c Release -o --include-symbols --include-source --no-build /p:PackageVersion=$(VersionTag)
       env:
         VersionTag: ${{ github.ref }}
 
