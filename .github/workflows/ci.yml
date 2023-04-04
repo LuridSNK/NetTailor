@@ -29,5 +29,5 @@ jobs:
       env:
         VersionTag: ${{ github.ref }}
 
-    - name: Publish NuGet package
-      run: dotnet nuget push **/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+#    - name: Publish NuGet package
+#      run: dotnet nuget push **/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
